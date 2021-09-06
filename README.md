@@ -1,4 +1,4 @@
-#this is a fork    plz go to joe7575/techage_modpack for the original 
+ # this is a fork    plz go to joe7575/techage_modpack for the original 
 
 # Modpack Tech Age [techage]
 
