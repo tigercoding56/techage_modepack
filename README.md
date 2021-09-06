@@ -1,4 +1,7 @@
+#this is a fork    plz go to joe7575/techage_modpack for the original 
+
 # Modpack Tech Age [techage]
+
 
 This modpack covers all necessary and useful mods to be able to use techage.
 All mods have the own README.txt. For further information please consult these files.
