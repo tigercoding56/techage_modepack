@@ -3,11 +3,11 @@
 	TechAge
 	=======
 
-	Copyright (C) 2017-2020 Joachim Stolberg
+	Copyright (C) 2017-2022 Joachim Stolberg
 
 	AGPL v3
 	See LICENSE.txt for more information
-	
+
 	Node Detector
 
 ]]--
@@ -60,20 +60,21 @@ local function any_node_changed(pos)
 		nvm.num = #minetest.find_nodes_in_area(nvm.pos1, nvm.pos2, {"air"})
 		return false
 	end
-	local num = #minetest.find_nodes_in_area(nvm.pos1, nvm.pos2, {"air"})
-	
-	if nvm.num ~= num then
-		if nvm.mode == 1 and num < nvm.num then 
-			nvm.num = num
+	local num1 = #minetest.find_nodes_in_area(nvm.pos1, nvm.pos2, {"air"})
+	local num2 = #minetest.find_nodes_in_area(nvm.pos1, nvm.pos2, {"ignore"})
+
+	if num2 == 0 and nvm.num ~= num1 then
+		if nvm.mode == 1 and num1 < nvm.num then
+			nvm.num = num1
 			return true
-		elseif nvm.mode == 2 and num > nvm.num then 
-			nvm.num = num
+		elseif nvm.mode == 2 and num1 > nvm.num then
+			nvm.num = num1
 			return true
 		elseif nvm.mode == 3 then
-			nvm.num = num
+			nvm.num = num1
 			return true
 		end
-		nvm.num = num
+		nvm.num = num1
 	end
 	return false
 end
@@ -82,7 +83,7 @@ local function on_receive_fields(pos, formname, fields, player)
 	if minetest.is_protected(pos, player:get_player_name()) then
 		return
 	end
-	
+
 	local nvm = techage.get_nvm(pos)
 	local meta = M(pos)
 	if fields.accept then
@@ -112,7 +113,7 @@ minetest.register_node("techage:ta3_nodedetector_off", {
 		"techage_filling_ta3.png^techage_frame_ta3_top.png",
 		"techage_filling_ta3.png^techage_frame_ta3.png^techage_appl_nodedetector.png",
 	},
-	
+
 	after_place_node = function(pos, placer)
 		local meta = M(pos)
 		local nvm = techage.get_nvm(pos)
@@ -123,22 +124,22 @@ minetest.register_node("techage:ta3_nodedetector_off", {
 		minetest.get_node_timer(pos):start(CYCLE_TIME)
 		any_node_changed(pos)
 	end,
-	
+
 	on_timer = node_timer,
 	on_receive_fields = on_receive_fields,
-	
+
 	techage_set_numbers = function(pos, numbers, player_name)
 		local meta = M(pos)
 		local res = logic.set_numbers(pos, numbers, player_name, S("TA3 Node Detector"))
 		meta:set_string("formspec", formspec(meta, techage.get_nvm(pos)))
 		return res
 	end,
-	
+
 	after_dig_node = function(pos, oldnode, oldmetadata, digger)
 		techage.remove_node(pos, oldnode, oldmetadata)
 		techage.del_mem(pos)
 	end,
-	
+
 	on_rotate = screwdriver.disallow,
 	paramtype2 = "facedir",
 	is_ground_content = false,
@@ -154,21 +155,21 @@ minetest.register_node("techage:ta3_nodedetector_on", {
 		"techage_filling_ta3.png^techage_frame_ta3_top.png",
 		"techage_filling_ta3.png^techage_frame_ta3.png^techage_appl_nodedetector_on.png",
 	},
-			
+
 	on_timer = node_timer,
-	
+
 	techage_set_numbers = function(pos, numbers, player_name)
 		local meta = M(pos)
 		local res = logic.set_numbers(pos, numbers, player_name, S("TA3 Node Detector"))
 		meta:set_string("formspec", formspec(meta, techage.get_nvm(pos)))
 		return res
 	end,
-	
+
 	after_dig_node = function(pos, oldnode, oldmetadata, digger)
 		techage.remove_node(pos, oldnode, oldmetadata)
 		techage.del_mem(pos)
 	end,
-	
+
 	on_rotate = screwdriver.disallow,
 	paramtype2 = "facedir",
 	is_ground_content = false,
@@ -188,22 +189,30 @@ minetest.register_craft({
 
 techage.register_node({"techage:ta3_nodedetector_off", "techage:ta3_nodedetector_on"}, {
 	on_recv_message = function(pos, src, topic, payload)
-		if topic == "name" then
-			local nvm = techage.get_nvm(pos)
-			return nvm.player_name or ""
-		elseif topic == "state" then
+		if topic == "state" then
 			local node = techage.get_node_lvm(pos)
 			if node.name == "techage:ta3_nodedetector_off" then
-				return "on"
-			else
 				return "off"
+			else
+				return "on"
 			end
 		else
 			return "unsupported"
 		end
 	end,
+	on_beduino_request_data = function(pos, src, topic, payload)
+		if topic == 142 then
+			local node = techage.get_node_lvm(pos)
+			if node.name == "techage:ta3_nodedetector_off" then
+				return 0, {0}
+			else
+				return 0, {1}
+			end
+		else
+			return 2, ""
+		end
+	end,
 	on_node_load = function(pos)
 		minetest.get_node_timer(pos):start(CYCLE_TIME)
 	end,
-})		
-
+})

@@ -95,7 +95,7 @@ function networks.hide_node(pos, node, placer)
 	local inv = placer:get_inventory()
 	local stack = inv:get_stack("main", 1)
 	local taken = stack:take_item(1)
-	
+
 	if taken:get_count() == 1 and tFillingMaterial[taken:get_name()] then
 		local meta = M(pos)
 		meta:set_string("netw_name", node.name)
@@ -118,7 +118,7 @@ function networks.open_node(pos, node, placer)
 	else
 		param2 = M(pos):get_int("netw_param2_copy")
 	end
-	minetest.swap_node(pos, {name = name, param2 = param2 % 32})
+	minetest.swap_node(pos, {name = name, param2 = param2 % 32 + M(pos):get_int("netw_color_param2")})
 	local meta = M(pos)
 	meta:set_string("netw_name", "")
 	local inv = placer:get_inventory()

@@ -3,13 +3,13 @@
 	TechAge
 	=======
 
-	Copyright (C) 2019 Joachim Stolberg
+	Copyright (C) 2019-2022 Joachim Stolberg
 
 	AGPL v3
 	See LICENSE.txt for more information
-	
+
 	TA2 Gravel Rinser, washing sieved gravel to find more ores
-	
+
 ]]--
 
 -- for lazy programmers
@@ -146,7 +146,7 @@ local function washing(pos, crd, nvm, inv)
 		crd.State:keep_running(pos, nvm, COUNTDOWN_TICKS)
 		return
 	end
-	
+
 	local src = ItemStack("techage:sieved_gravel")
 	local dst = ItemStack("default:sand")
 	if inv:contains_item("src", src) then
@@ -249,13 +249,19 @@ local tubing = {
 	on_recv_message = function(pos, src, topic, payload)
 		return CRD(pos).State:on_receive_message(pos, topic, payload)
 	end,
+	on_beduino_receive_cmnd = function(pos, src, topic, payload)
+		return CRD(pos).State:on_beduino_receive_cmnd(pos, topic, payload)
+	end,
+	on_beduino_request_data = function(pos, src, topic, payload)
+		return CRD(pos).State:on_beduino_request_data(pos, topic, payload)
+	end,
 	on_node_load = function(pos)
 		remove_objects({x=pos.x, y=pos.y+1, z=pos.z})
 		CRD(pos).State:on_node_load(pos)
 	end,
 }
 
-local node_name_ta2, node_name_ta3, node_name_ta4 = 
+local node_name_ta2, node_name_ta3, node_name_ta4 =
 	techage.register_consumer("rinser", S("Gravel Rinser"), tiles, {
 		drawtype = "nodebox",
 		paramtype = "light",
@@ -317,24 +323,19 @@ minetest.register_craft({
 })
 
 
-if minetest.global_exists("unified_inventory") then
-	unified_inventory.register_craft_type("rinsing", {
-		description = S("Rinsing"),
-		icon = "techage_appl_rinser_top.png^techage_frame_ta2_top.png",
-		width = 2,
-		height = 2,
-	})
-end
+techage.recipes.register_craft_type("rinsing", {
+	description = S("Rinsing"),
+	icon = "techage_appl_rinser_top.png^techage_frame_ta2_top.png",
+	width = 2,
+	height = 2,
+})
 
 function techage.add_rinser_recipe(recipe)
 	Probability[recipe.output] = recipe.probability
-	if minetest.global_exists("unified_inventory") then
-		recipe.items = {recipe.input}
-		recipe.type = "rinsing"
-		unified_inventory.register_craft(recipe)
-	end
-end	
+	recipe.items = {recipe.input}
+	recipe.type = "rinsing"
+	techage.recipes.register_craft(recipe)
+end
 
 techage.add_rinser_recipe({input="techage:sieved_gravel", output="techage:usmium_nuggets", probability=30})
 techage.add_rinser_recipe({input="techage:sieved_gravel", output="default:copper_lump", probability=15})
-

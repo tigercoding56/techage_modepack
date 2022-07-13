@@ -3,11 +3,11 @@
 	TechAge
 	=======
 
-	Copyright (C) 2019-2021 Joachim Stolberg
+	Copyright (C) 2019-2022 Joachim Stolberg
 
 	AGPL v3
 	See LICENSE.txt for more information
-	
+
 	TA3/TA4 Powder Silo
 
 ]]--
@@ -28,7 +28,7 @@ local function allow_metadata_inventory_put(pos, listname, index, stack, player)
 		return 0
 	end
 	-- check if it is powder or techage liquid item (migration function)
-	local ndef = minetest.registered_craftitems[stack:get_name()] or 
+	local ndef = minetest.registered_craftitems[stack:get_name()] or
 			minetest.registered_items[stack:get_name()] or {}
 	if ndef.groups and (ndef.groups.powder == 1 or ndef.groups.ta_liquid == 1) then
 		local nvm = techage.get_nvm(pos)
@@ -71,7 +71,7 @@ local function get_item_name(nvm, inv)
 			return nvm.item_name
 		end
 	end
-end	
+end
 
 local function get_item_count(pos)
 	local inv = M(pos):get_inventory()
@@ -81,7 +81,7 @@ local function get_item_count(pos)
 		count = count + stack:get_count()
 	end
 	return count
-end	
+end
 
 local function get_silo_capa(pos)
 	local inv = M(pos):get_inventory()
@@ -92,7 +92,7 @@ local function get_silo_capa(pos)
 		end
 	end
 	return inv:get_size("main") * STACKMAX
-end	
+end
 
 local function formspec3()
 	return "size[8,5]"..
@@ -257,7 +257,7 @@ techage.register_node({"techage:ta3_silo", "techage:ta4_silo"}, {
 	on_pull_item = function(pos, in_dir, num)
 		local inv = M(pos):get_inventory()
 		if not inv:is_empty("main") then
-			local taken = techage.get_items(pos, inv, "main", num) 
+			local taken = techage.get_items(pos, inv, "main", num)
 			local nvm = techage.get_nvm(pos)
 			nvm.item_count = nvm.item_count or get_item_count(pos)
 			nvm.item_count = nvm.item_count - taken:get_count()
@@ -270,7 +270,7 @@ techage.register_node({"techage:ta3_silo", "techage:ta4_silo"}, {
 		local ndef = minetest.registered_craftitems[name] or {}
 		if ndef.groups and ndef.groups.powder == 1 then
 			local inv = M(pos):get_inventory()
-				
+
 			if inv:is_empty("main")  then
 				inv:add_item("main", stack)
 				local nvm = techage.get_nvm(pos)
@@ -278,7 +278,7 @@ techage.register_node({"techage:ta3_silo", "techage:ta4_silo"}, {
 				nvm.item_count = nvm.item_count + stack:get_count()
 				return true
 			end
-			
+
 			if inv:contains_item("main", name) and inv:room_for_item("main", stack) then
 				inv:add_item("main", stack)
 				local nvm = techage.get_nvm(pos)
@@ -312,11 +312,30 @@ techage.register_node({"techage:ta3_silo", "techage:ta4_silo"}, {
 			return "unsupported"
 		end
 	end,
+	on_beduino_request_data = function(pos, src, topic, payload)
+		if topic == 131 then  -- Chest State
+			local meta = M(pos)
+			local inv = meta:get_inventory()
+			return 0, {techage.get_inv_state_num(inv, "main")}
+		elseif topic == 134 then
+			local inv = M(pos):get_inventory()
+			local nvm = techage.get_nvm(pos)
+			nvm.item_count = nvm.item_count or get_item_count(pos)
+			nvm.capa = nvm.capa or get_silo_capa(pos)
+			if payload[1] == 1 then
+				return 0, {techage.power.percent(nvm.capa, nvm.item_count)}
+			else
+				return 0, {nvm.item_count}
+			end
+		else
+			return 2, ""
+		end
+	end,
 	on_node_load = function(pos)
 		local nvm = techage.get_nvm(pos)
 		nvm.item_count = nil
 	end,
-})	
+})
 
 liquid.register_nodes({"techage:ta3_silo", "techage:ta4_silo"},	Pipe, "tank", nil, tLiquid)
 

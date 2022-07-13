@@ -3,11 +3,11 @@
 	TechAge
 	=======
 
-	Copyright (C) 2019-2021 Joachim Stolberg
+	Copyright (C) 2019-2022 Joachim Stolberg
 
 	AGPL v3
 	See LICENSE.txt for more information
-	
+
 	TA4 Isolation Transformer (to separate networks)
 
 ]]--
@@ -79,7 +79,7 @@ local function node_timer(pos, elapsed)
 	if techage.is_activeformspec(pos) then
 		M(pos):set_string("formspec", formspec(State, pos, nvm, data))
 	end
-	return true		
+	return true
 end
 
 local function on_rightclick(pos, node, clicker)
@@ -107,7 +107,7 @@ end
 
 local function after_dig_node(pos, oldnode, oldmetadata, digger)
 	local outdir = tonumber(oldmetadata.fields.outdir or 0)
-	Cable:after_dig_node(pos, {outdir, networks.Flip[outdir]})        
+	Cable:after_dig_node(pos, {outdir, networks.Flip[outdir]})
 	techage.del_mem(pos)
 end
 
@@ -150,6 +150,12 @@ techage.register_node({"techage:ta4_transformer"}, {
 	on_recv_message = function(pos, src, topic, payload)
 		return State:on_receive_message(pos, topic, payload)
 	end,
+	on_beduino_receive_cmnd = function(pos, src, topic, payload)
+		return State:on_beduino_receive_cmnd(pos, topic, payload)
+	end,
+	on_beduino_request_data = function(pos, src, topic, payload)
+		return State:on_beduino_request_data(pos, topic, payload)
+	end,
 })
 
 control.register_nodes({"techage:ta4_transformer"}, {
@@ -165,7 +171,7 @@ control.register_nodes({"techage:ta4_transformer"}, {
 					running = techage.is_running(nvm) or false,
 					available = PWR_PERF,
 					provided = nvm.moved or 0,
-					termpoint = "-", 
+					termpoint = "-",
 				}
 			end
 			return false

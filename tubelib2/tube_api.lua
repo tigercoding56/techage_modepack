@@ -13,15 +13,14 @@
 ]]--
 
 -- Version for compatibility checks, see readme.md/history
-tubelib2.version = 2.1
+tubelib2.version = 2.2
 
 -- for lazy programmers
-local S = function(pos) if pos then return minetest.pos_to_string(pos) end end
+local P2S = function(pos) if pos then return minetest.pos_to_string(pos) end end
 local M = minetest.get_meta
 
--- Load support for intllib.
-local MP = minetest.get_modpath("tubelib2")
-local I,_ = dofile(MP.."/intllib.lua")
+-- Load support for I18n.
+local S = tubelib2.S
 
 -- Cardinal directions, regardless of orientation
 local Dir2Str = {"north", "east", "south", "west", "down", "up"}
@@ -31,23 +30,31 @@ function tubelib2.dir_to_string(dir)
 end
 
 -- Relative directions, dependant on orientation (param2)
-local DirToSide = {"B", "R", "F", "L", "D", "U"}
+local DirToSide = {
+  -- param2 (0 to 23)
+  {[0]="B","L","F","R", "U","U","U","U",  "D","D","D","D",  "B","L","F","R", "B","L","F","R", "B","L","F","R",},  -- dir = 1
+  {[0]="R","B","L","F", "R","B","L","F",  "R","B","L","F",  "U","U","U","U", "D","D","D","D", "L","F","R","B",},  -- dir = 2
+  {[0]="F","R","B","L", "D","D","D","D",  "U","U","U","U",  "F","R","B","L", "F","R","B","L", "F","R","B","L",},  -- dir = 3
+  {[0]="L","F","R","B", "L","F","R","B",  "L","F","R","B",  "D","D","D","D", "U","U","U","U", "R","B","L","F",},  -- dir = 4
+  {[0]="D","D","D","D", "B","L","F","R",  "F","R","B","L",  "R","B","L","F", "L","F","R","B", "U","U","U","U",},  -- dir = 5
+  {[0]="U","U","U","U", "F","R","B","L",  "B","L","F","R",  "L","F","R","B", "R","B","L","F", "D","D","D","D",},  -- dir = 6
+}
 
-function tubelib2.dir_to_side(dir, param2)
-	if dir < 5 then
-		dir = (((dir - 1) - (param2 % 4)) % 4) + 1
+local SideToDir = {B={}, R={}, F={}, L={}, D={}, U={}}
+
+for param2 = 0,23 do
+	for dir = 1,6 do
+		local side = DirToSide[dir][param2]
+		SideToDir[side][param2] = dir
 	end
-	return DirToSide[dir]
 end
 
-local SideToDir = {B=1, R=2, F=3, L=4, D=5, U=6}
+function tubelib2.dir_to_side(dir, param2)
+	return DirToSide[dir][param2]
+end
 
 function tubelib2.side_to_dir(side, param2)
-	local dir = SideToDir[side]
-	if dir < 5 then
-		dir = (((dir - 1) + (param2 % 4)) % 4) + 1
-	end
-	return dir
+	return SideToDir[side][param2]
 end
 
 
@@ -92,7 +99,7 @@ local function update1(self, pos, dir)
 	local fpos,fdir = self:walk_tube_line(pos, dir)
 	self:infotext(get_pos(pos, dir), fpos)
 	self:infotext(fpos, get_pos(pos, dir))
-	-- Translate pos/dir pointing to the secondary node into 
+	-- Translate pos/dir pointing to the secondary node into
 	-- spos/sdir of the secondary node pointing to the tube.
 	if fpos and fdir then
 		local spos, sdir = get_pos(fpos,fdir), Turn180Deg[fdir]
@@ -111,13 +118,13 @@ local function update2(self, pos1, dir1, pos2, dir2)
 		-- reset next tube(s) to head tube(s) again
 		local param2 = self:encode_param2(dir1, dir2, 2)
 		self:update_after_dig_tube(pos1, param2)
-		M(get_pos(pos1, dir1)):set_string("infotext", I("Maximum length reached!"))
-		M(get_pos(pos1, dir2)):set_string("infotext", I("Maximum length reached!"))
-		return false 
+		M(get_pos(pos1, dir1)):set_string("infotext", S("Maximum length reached!"))
+		M(get_pos(pos1, dir2)):set_string("infotext", S("Maximum length reached!"))
+		return false
 	end
 	self:infotext(fpos1, fpos2)
 	self:infotext(fpos2, fpos1)
-	-- Translate fpos/fdir pointing to the secondary node into 
+	-- Translate fpos/fdir pointing to the secondary node into
 	-- spos/sdir of the secondary node pointing to the tube.
 	local spos1, sdir1 = get_pos(fpos1,fdir1), Turn180Deg[fdir1]
 	local spos2, sdir2 = get_pos(fpos2,fdir2), Turn180Deg[fdir2]
@@ -136,7 +143,7 @@ local function update3(self, pos, dir1, dir2)
 		local fpos2,fdir2,cnt2 = self:walk_tube_line(pos, dir2)
 		self:infotext(fpos1, fpos2)
 		self:infotext(fpos2, fpos1)
-		-- Translate fpos/fdir pointing to the secondary node into 
+		-- Translate fpos/fdir pointing to the secondary node into
 		-- spos/sdir of the secondary node pointing to the tube.
 		if fpos1 and fpos2 and fdir1 and fdir2 then
 			local spos1, sdir1 = get_pos(fpos1,fdir1), Turn180Deg[fdir1]
@@ -161,7 +168,7 @@ local function update_secondary_nodes_after_node_placed(self, pos, dirs)
 		if self.force_to_use_tubes then
 			tmp, npos = self:get_special_node(pos, dir)
 		else
-			tmp, npos = self:get_secondary_node(pos, dir) 
+			tmp, npos = self:get_secondary_node(pos, dir)
 		end
 		if npos then
 			self:update_secondary_node(npos, Turn180Deg[dir], pos, dir)
@@ -178,7 +185,7 @@ local function update_secondary_nodes_after_node_dug(self, pos, dirs)
 		if self.force_to_use_tubes then
 			tmp, npos = self:get_special_node(pos, dir)
 		else
-			tmp, npos = self:get_secondary_node(pos, dir) 
+			tmp, npos = self:get_secondary_node(pos, dir)
 		end
 		if npos then
 			self:del_from_cache(npos, Turn180Deg[dir])
@@ -196,18 +203,18 @@ end
 function Tube:new(attr)
 	local o = {
 		dirs_to_check = attr.dirs_to_check or {1,2,3,4,5,6},
-		max_tube_length = attr.max_tube_length or 1000, 
-		primary_node_names = Tbl(attr.primary_node_names or {}), 
+		max_tube_length = attr.max_tube_length or 1000,
+		primary_node_names = Tbl(attr.primary_node_names or {}),
 		secondary_node_names = Tbl(attr.secondary_node_names or {}),
 		valid_node_contact_sides = {},
 		show_infotext = attr.show_infotext or false,
-		force_to_use_tubes = attr.force_to_use_tubes or false, 
+		force_to_use_tubes = attr.force_to_use_tubes or false,
 		clbk_after_place_tube = attr.after_place_tube,
 		tube_type = attr.tube_type or "unknown",
 		pairingList = {}, -- teleporting nodes
 		connCache = {}, -- connection cache {pos1 = {dir1 = {pos2 = pos2, dir2 = dir2},...}
 		special_node_names = {}, -- use add_special_node_names() to register nodes
-		debug_info = attr.debug_info,  -- debug_info(pos, text) 
+		debug_info = attr.debug_info,  -- debug_info(pos, text)
 	}
 	o.valid_dirs = Tbl(o.dirs_to_check)
 	setmetatable(o, self)
@@ -234,7 +241,7 @@ local function invert_booleans(tab)
 	end
 	return inversion
 end
-local valid_sides_default_true = Tbl(DirToSide)
+local valid_sides_default_true = Tbl({"B", "R", "F", "L", "D", "U"})
 local valid_sides_default_false = invert_booleans(valid_sides_default_true)
 local function complete_valid_sides(valid_sides, existing_defaults)
 	local valid_sides_complete = {}
@@ -368,13 +375,13 @@ end
 function Tube:after_dig_tube(pos, oldnode)
 	-- [s1][f1]----[n1] x [n2]-----[f2][s2]
 	-- s..secondary, f..far, n..near, x..node to be removed
-	
+
 	-- update tubes
 	if oldnode and oldnode.param2 then
 		local dir1, dir2 = self:update_after_dig_tube(pos, oldnode.param2)
 		if dir1 then update1(self, pos, dir1) end
 		if dir2 then update1(self, pos, dir2) end
-		
+
 		-- Update secondary nodes, if right beside
 		dir1, dir2 = self:decode_param2(pos, oldnode.param2)
 		local npos1,ndir1 = get_pos(pos, dir1),Turn180Deg[dir1]
@@ -391,11 +398,11 @@ end
 -- The returned pos is the destination position, dir
 -- is the direction into the destination node.
 function Tube:get_connected_node_pos(pos, dir)
-	local key = S(pos)
+	local key = P2S(pos)
 	if self.connCache[key] and self.connCache[key][dir] then
 		local item = self.connCache[key][dir]
 		return item.pos2, Turn180Deg[item.dir2]
-	end	
+	end
 	local fpos,fdir = self:walk_tube_line(pos, dir)
 	local spos = get_pos(fpos,fdir)
 	self:add_to_cache(pos, dir, spos, Turn180Deg[fdir])
@@ -405,7 +412,7 @@ end
 
 -- Check if node at given position is a tubelib2 compatible node,
 -- able to receive and/or deliver items.
--- If dir == nil then node_pos = pos 
+-- If dir == nil then node_pos = pos
 -- Function returns the result (true/false), new pos, and the node
 function Tube:compatible_node(pos, dir)
 	local npos = vector.add(pos, Dir6dToVector[dir or 0])
@@ -449,10 +456,10 @@ function Tube:prepare_pairing(pos, tube_dir, sFormspec)
 	elseif tube_dir then
 		meta:set_int("tube_dir", tube_dir)
 		meta:set_string("channel", nil)
-		meta:set_string("infotext", I("Pairing is missing"))
+		meta:set_string("infotext", S("Pairing is missing"))
 		meta:set_string("formspec", sFormspec)
 	else
-		meta:set_string("infotext", I("Connection to a tube is missing!"))
+		meta:set_string("infotext", S("Connection to a tube is missing!"))
 	end
 end
 
@@ -469,7 +476,7 @@ function Tube:pairing(pos, channel)
 		self.pairingList[channel] = pos
 		local meta = M(pos)
 		meta:set_string("channel", channel)
-		meta:set_string("infotext", I("Pairing is missing").." ("..channel..")")
+		meta:set_string("infotext", S("Pairing is missing (@1)", channel))
 		return false
 	end
 end
@@ -485,7 +492,7 @@ function Tube:stop_pairing(pos, oldmetadata, sFormspec)
 				peer_meta:set_string("channel", nil)
 				peer_meta:set_string("tele_pos", nil)
 				peer_meta:set_string("formspec", sFormspec)
-				peer_meta:set_string("infotext", I("Pairing is missing"))
+				peer_meta:set_string("infotext", S("Pairing is missing"))
 			end
 		elseif oldmetadata.fields.channel then
 			self.pairingList[oldmetadata.fields.channel] = nil
@@ -497,14 +504,14 @@ end
 -- Used by chat commands, when tubes are placed e.g. via WorldEdit
 function Tube:replace_tube_line(pos1, pos2)
 	if pos1 and pos2 and not vector.equals(pos1, pos2) then
-		local check = (((pos1.x == pos2.x) and 1) or 0) + 
-				(((pos1.y == pos2.y) and 1) or 0) + 
+		local check = (((pos1.x == pos2.x) and 1) or 0) +
+				(((pos1.y == pos2.y) and 1) or 0) +
 				(((pos1.z == pos2.z) and 1) or 0)
 		if check == 2 then
 			local v = vector.direction(pos1, pos2)
 			local dir1 = self:vector_to_dir(v)
 			local dir2 = Turn180Deg[dir1]
-		
+
 			self:replace_nodes(pos1, pos2, dir1, dir2)
 			update3(self, pos1, dir1, dir2)
 		end
@@ -532,4 +539,4 @@ function Tube:get_tube_line(pos, dir)
 			end
 		end, self, 0
 	end
-end	
+end

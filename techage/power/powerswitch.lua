@@ -3,11 +3,11 @@
 	TechAge
 	=======
 
-	Copyright (C) 2019-2020 Joachim Stolberg
+	Copyright (C) 2019-2022 Joachim Stolberg
 
 	AGPL v3
 	See LICENSE.txt for more information
-	
+
 	TA3 Power Switch  (large and small)
 
 ]]--
@@ -54,7 +54,7 @@ local function switch_on(pos, node, clicker, name)
 		})
 	local dir = Param2ToDir[node.param2]
 	local pos2 = tubelib2.get_pos(pos, dir)
-	
+
 	techage.legacy_switches(pos2)
 	power.turn_switch_on(pos2, Cable, "techage:powerswitch_box_off", "techage:powerswitch_box_on")
 end
@@ -73,7 +73,7 @@ local function switch_off(pos, node, clicker, name)
 		})
 	local dir = Param2ToDir[node.param2]
 	local pos2 = tubelib2.get_pos(pos, dir)
-	
+
 	techage.legacy_switches(pos2)
 	power.turn_switch_off(pos2, Cable, "techage:powerswitch_box_off", "techage:powerswitch_box_on")
 end
@@ -94,7 +94,7 @@ minetest.register_node("techage:powerswitch", {
 			{ -1/6, -12/16, -1/6,  1/6, -8/16, 1/6},
 		},
 	},
-	
+
 	after_place_node = function(pos, placer)
 		local meta = M(pos)
 		local number = techage.add_node(pos, "techage:powerswitch")
@@ -137,7 +137,7 @@ minetest.register_node("techage:powerswitch_on", {
 			{ -1/6, -12/16, -1/6,  1/6, -8/16, 1/6},
 		},
 	},
-	
+
 	on_rightclick = function(pos, node, clicker)
 		switch_off(pos, node, clicker, "techage:powerswitch")
 	end,
@@ -169,7 +169,7 @@ minetest.register_node("techage:powerswitchsmall", {
 			{ -2/16, -12/16, -2/16, 2/16,  -8/16, 2/16},
 		},
 	},
-	
+
 	after_place_node = function(pos, placer)
 		local meta = M(pos)
 		local number = techage.add_node(pos, "techage:powerswitchsmall")
@@ -212,7 +212,7 @@ minetest.register_node("techage:powerswitchsmall_on", {
 			{ -2/16, -12/16, -2/16, 2/16,  -8/16, 2/16},
 		},
 	},
-	
+
 	on_rightclick = function(pos, node, clicker)
 		switch_off(pos, node, clicker, "techage:powerswitchsmall")
 	end,
@@ -246,7 +246,7 @@ techage.register_node({"techage:powerswitch", "techage:powerswitch_on",
 			switch_off(pos, node, nil, "techage:powerswitchsmall")
 			return true
 		elseif topic == "state" then
-			if node.name == "techage:powerswitch_on" or 
+			if node.name == "techage:powerswitch_on" or
 					node.name == "techage:powerswitchsmall_on" then
 				return "on"
 			end
@@ -255,7 +255,37 @@ techage.register_node({"techage:powerswitch", "techage:powerswitch_on",
 			return "unsupported"
 		end
 	end,
-})	
+	on_beduino_receive_cmnd = function(pos, src, topic, payload)
+		local node = techage.get_node_lvm(pos)
+		if topic == 1 and payload[1] == 1 and node.name == "techage:powerswitch" then
+			switch_on(pos, node, nil, "techage:powerswitch_on")
+			return 0
+		elseif topic == 1 and payload[1] == 1 and node.name == "techage:powerswitchsmall" then
+			switch_on(pos, node, nil, "techage:powerswitchsmall_on")
+			return 0
+		elseif topic == 1 and payload[1] == 0 and node.name == "techage:powerswitch_on" then
+			switch_off(pos, node, nil, "techage:powerswitch")
+			return 0
+		elseif topic == 1 and payload[1] == 0 and node.name == "techage:powerswitchsmall_on" then
+			switch_off(pos, node, nil, "techage:powerswitchsmall")
+			return 0
+		else
+			return 2
+		end
+	end,
+	on_beduino_request_data = function(pos, src, topic, payload)
+		local node = techage.get_node_lvm(pos)
+		if topic == 142 then
+			if node.name == "techage:powerswitch_on" or
+					node.name == "techage:powerswitchsmall_on" then
+				return 0, {1}
+			end
+			return 0, {0}
+		else
+			return 2, ""
+		end
+	end,
+})
 
 minetest.register_craft({
 	output = "techage:powerswitch 2",
@@ -271,4 +301,3 @@ minetest.register_craft({
 	output = "techage:powerswitchsmall",
 	recipe = {"techage:powerswitch"},
 })
-

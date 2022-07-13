@@ -97,6 +97,10 @@ TA3 Boiler Base=TA3 Boiler unten
 
 To add water punch@nthe boiler@nwith a water bucket=Um Wasser nachzufüllen,@nschlage mit einem Wassereimer@nauf den Block
 Water Boiler=Wasserboiler
+
+### boiler_lib.lua ###
+### heatexchanger2.lua ###
+
 water temperature=Wassertemperatur
 
 ### boiler_top.lua ###
@@ -110,12 +114,20 @@ TA3 Booster=TA3 Gebläse
 ### button.lua ###
 
 Access:=Zugriff:
+Command to be sent=Zu sendender Befehl 
 TA3 Button/Switch=TA3 Taster/Schalter
 TA4 Button/Switch=TA4 Schalter/Taster
 
 ### button.lua ###
+### button_2x.lua ###
+### button_4x.lua ###
+
+Command=Kommando
+
+### button.lua ###
 ### cart_detector.lua ###
 ### detector.lua ###
+### light_detector.lua ###
 ### lua_logic.lua ###
 ### mesecons_converter.lua ###
 ### node_detector.lua ###
@@ -130,15 +142,44 @@ Insert destination node number(s)=Gebe Zielnummer(n) ein
 ### doorcontroller.lua ###
 ### mesecons_converter.lua ###
 ### repeater.lua ###
+### sequencer2.lua ###
 ### submenu.lua ###
 
 Save=Speichern
+
+### button_2x.lua ###
+
+TA4 2x Button=TA4 2x Taster
+
+### button_2x.lua ###
+### button_4x.lua ###
+
+Access=Zugriff
+Button protection=Tastenschutz
+Command to be sent (ignored for switches)=Zu sendender Befehl (wird für Schalter ignoriert)
+Destination block number=Zielblocknummer 
+Label for the button=Beschriftung für die Taste
+Momentary button or on/off switch=Taster oder Ein-/Ausschalter
+Number=Nummer
+Type=Typ
+
+### button_2x.lua ###
+### button_4x.lua ###
+### signallamp_2x.lua ###
+### signallamp_4x.lua ###
+
+Label=Beschriftung
+
+### button_4x.lua ###
+
+TA4 4x Button=TA4 4x Taster
 
 ### cart_detector.lua ###
 
 TA3 Cart Detector=TA3 Wagen Detektor
 
 ### cart_detector.lua ###
+### light_detector.lua ###
 ### node_detector.lua ###
 
 accept=akzeptieren
@@ -161,6 +202,8 @@ Cement Powder=Zement Pulver
 
 TA4 Ceramic Material=TA4 Keramik Material
 TA4 Furnace Ceramic=TA4 Ofen Keramik
+TA4 Round Ceramic=TA4 Rund-Keramik
+TA5 Ceramic Turbine=TA5 Keramikturbine
 
 ### charcoalpile.lua ###
 
@@ -196,6 +239,20 @@ TA4 State Collector=TA4 Zuständesammler
 TA4 Tube Concentrator=TA4 Röhren Konzentrator
 Tube Concentrator=Röhren Konzentrator
 
+### controller.lua ###
+
+Cooling failed=Kühlung ausgefallen
+Magnet detection error@n(@1% found / 100% expected)=Magneterkennungsfehler@n(@1% erkannt / 100% erwartet)
+Nucleus detection error=Kern nicht erkannt
+Plasma ring shape error=Formfehler des Plasmarings
+Shell shape error@n(@1% found / 100% expected)=Hüllenformfehler@n(@1% erkannt / 100% erwartet)
+TA5 Fusion Reactor Controller=TA5 Fusionsreaktor Controller
+
+### controller.lua ###
+### heatexchanger2.lua ###
+
+No power=Kein Strom
+
 ### cooking.lua ###
 
 TA3 Melting=TA3 Schmelzen
@@ -203,6 +260,15 @@ TA3 Melting=TA3 Schmelzen
 ### cooler.lua ###
 
 TA3 Cooler=TA3 Kühler
+TA4 Collider Cooler=TA4 Collider Kühler
+
+### counting.lua ###
+
+Your current value is=Der aktuelle Wert ist
+[techage] The limit for 'number of commands per minute' has been exceeded.=[techage] Das Limit für 'Anzahl Befehle pro Minute' wurde überschritten.
+is allowed=ist erlaubt
+is allowed. Current value is=ist erlaubt. Aktueller Wert ist
+per minute=pro Minute
 
 ### cylinder.lua ###
 
@@ -210,8 +276,25 @@ TA2 Cylinder=TA2 Zylinder
 
 ### detector.lua ###
 
-TA3 Detector=TA3 Detektor
+TA4 Collider Detector=TA4 Collider Detektor
+TA4 Collider Detector Core=TA4 Collider Detektorkern
 TA4 Detector=TA4 Detektor
+
+### detector.lua ###
+### logic_block.lua ###
+### tele.lua ###
+
+Blocking Time=Sperrzeit
+
+### detector.lua ###
+### tele.lua ###
+
+Configured Items=Konfigurierte Gegenstände
+Items which generate an 'on' command.@nIf empty, all passed items generate an 'on' command.=Items, die einen 'on'-Kommando generieren.@nWenn leer, generieren alle übergebenen Items einen 'on'-Befehl.
+On Time=ON Zeit
+TA3 Detector=TA3 Detektor
+The time after the 'off' command@nuntil the next 'on' command is accepted.=Die Zeit nach dem 'off' Kommando,@nbis das nächste 'on' Kommando akzeptiert wird.
+The time between the 'on' and 'off' commands.=Die Zeit zwischen den 'on' und 'off' Kommandos.
 
 ### display.lua ###
 
@@ -250,14 +333,20 @@ Blocks are back=Blöcke sind wieder da
 Blocks are disappeared=Blöcke sind verschwunden
 Click on all the blocks that are part of the door/gate=Klicke auf alle Blöcke, die Teil des Tores sind
 Ctrl,Inv=Ctrl,Inv
-Done=Fertig
-Record=Aufzeichnen
-Recording...=Aufzeichnung...
 Remove=Entfernen
 Set=Setzen
 TA3 Door Controller II=TA3 Tür Controller II
-block positions are stored.=Block Positionen gespeichert.
 with door sound=mit Türgeräusch
+
+### doorcontroller2.lua ###
+### flycontroller.lua ###
+### movecontroller.lua ###
+### turncontroller.lua ###
+
+Done=Fertig
+Record=Aufzeichnen
+Recording...=Aufzeichnung...
+block positions are stored.=Block Positionen gespeichert.
 
 ### drillbox.lua ###
 
@@ -314,6 +403,8 @@ TA3 Vacuum Tube=TA3 Vakuumröhre
 TA4 LEDs=TA4 LEDs
 TA4 RAM Chip=RAM Chip
 TA4 WLAN Chip=TA4 WLAN Chip
+TA5 AI Chip=TA5 KI Chip
+TA5 AI Chip II=TA5 KI Chip II
 WLAN Chip=WLAN Chip
 
 ### electronic_fab.lua ###
@@ -352,6 +443,49 @@ TA3 Power Station Firebox=TA3 Kraftwerks-Feuerbox
 
 Firebox=Feuerkasten
 
+### fly_lib.lua ###
+
+Destination position is protected=Zielposition ist geschützt
+Error: Max. length of the flight route exceeded !!=Fehler: Max. Flugstreckenlänge überschritten !!
+No valid destination position=Keine gültige Zielposition
+No valid node at the start position=Kein gültiger Block an der Startposition
+Start position is protected=Startposition ist geschützt
+
+### fly_lib.lua ###
+### flycontroller.lua ###
+
+Error: Invalid path !!=Fehler: Ungültiger Pfad !!
+
+### flycontroller.lua ###
+
+Error: Recording is missing !!=Fehler: Aufzeichnung fehlt !!
+Flight route (A to B)=Flug Route (A nach B)
+Move=Bewege
+See chat output=Siehe chat Ausgabe
+TA5 Fly Controller=TA5 Flug Controller
+Test=Test
+[TA4 Fly Controller] Invalid path!=[TA5 Flug Controller] Ungültiger Pfad!
+[TA4 Fly Controller] Recording is missing!=[TA5 Flug Controller] Aufzeichnung fehlt!
+
+### flycontroller.lua ###
+### logic_block.lua ###
+### lua_logic.lua ###
+### movecontroller.lua ###
+
+Store=Speichern
+
+### flycontroller.lua ###
+### movecontroller.lua ###
+
+Click on all blocks that shall be moved=Klicke auf alle Blöcke, die verschoben werden sollen
+Maximum Speed=Maximalgeschwindigkeit
+Maximum speed for moving blocks=Maximale Geschwindigkeit für bewegliche Blöcke
+Move A-B=Bewege A-B
+Move B-A=Bewege B-A
+Move block height=Move Block Höhe
+Stored=Gespeichert
+Value in the range of 0.0 to 1.0=Wert im Bereich von 0.0 bis 1.0
+
 ### flywheel.lua ###
 
 Flywheel=Schwungrad
@@ -370,6 +504,7 @@ loaded=geladen
 
 ### formspecs.lua ###
 
+Block has a wrench menu=Block hat ein Gabelschlüssel-Menü
 Charge termination=Ladebegrenzung
 Current output [ku]=Aktueller Ausgabewert
 Maximum output [ku]=Maximaler Ausgabewert
@@ -410,6 +545,11 @@ Furnace Top=Ofenoberteil
 Outp=Ergeb.
 no fuel or no power=kein Strom oder Brennstoff
 
+### gas_pipe.lua ###
+
+TA5 Junction Pipe=TA5 Leitungskupplung
+TA5 Pipe=TA5 Leitung
+
 ### gateblock.lua ###
 
 TechAge Gate Block=TechAge Torblock
@@ -422,6 +562,7 @@ TA2 Gearbox=TA2 Getriebeblock
 
 TA3 Generator=TA3 Generator
 TA4 Generator=TA4 Generator
+TA5 Generator=TA5 Generator
 
 ### generator.lua ###
 ### power_terminal2.lua ###
@@ -458,6 +599,7 @@ TA4 LED Grow Light=TA4 LED Pflanzenlampe
 
 No plan available=Kein Plan verfügar
 Plan=Plan
+Sectional view=Schnittbild
 Side view=Seitenansicht
 Top view=Draufsicht
 
@@ -477,25 +619,49 @@ TA4 Furnace Heater=TA4 Ofenheizung
 ### heatexchanger1.lua ###
 
 TA4 Heat Exchanger 1=TA4 Wärmetauscher 1
+TA5 Heat Exchanger 1=TA5 Wärmetauscher 1
 
 ### heatexchanger2.lua ###
 
+Blue pipe connection error@n(@1 found / @2 expected)=Verbindungsfehler blaue Leitung@n(@1 erkannt / @2 erwartet)
+Cooler error=Kühlungsfehler
+Green pipe connection error@n(@1 found / @2 expected)=Verbindungsfehler grüne Leitung@n(@1 erkannt / @2 erwartet)
 Power network connection error=Stromnetz Verbindungsfehler
 TA4 Heat Exchanger=TA4 Wärmetauscher
 TA4 Heat Exchanger 2=TA4 Wärmetauscher 2
+TA5 Heat Exchanger 2=TA5 Wärmetauscher 2
+Turbine error=
 did you check the plan?=hast du den Plan geprüft?
-inlet/pipe error=Einlass/Röhrenfehler
+inlet/pipe error=Einlass/Leitungsfehler
 wrong storage diameter=Falscher Wärmespeicher-Durchmesser
 
 ### heatexchanger3.lua ###
 
 TA4 Heat Exchanger 3=TA4 Wärmetauscher 3
+TA5 Heat Exchanger 3=TA5 Wärmetauscher 3
 
 ### hydrogen.lua ###
 
 Hydrogen Cylinder Large=Wasserstoffflasche groß
 Hydrogen Cylinder Small=Wasserstoffflasche klein
 TA4 Hydrogen=TA4 Wasserstoff
+
+### hyperloop.lua ###
+### sensorchest.lua ###
+### teleport.lua ###
+### terminal.lua ###
+
+not connected=nicht verbunden
+
+### hyperloop.lua ###
+### teleport.lua ###
+
+Block name=Blockname
+Connection name for this block=Verbindungsname für diesen Block
+Connection name of the remote block=Verbindungsname des entfernten Blocks
+Enter a block name or select an existing one=Gebe einen Blocknamen ein oder wähle einen vorhandenen aus
+Remote name=Name entfernter Block
+connected to=verbunden mit
 
 ### industriallamp1.lua ###
 
@@ -515,11 +681,18 @@ TA4 LED Industrial Lamp=TA4 LED Industrielampe
 
 ### inlet.lua ###
 
-TA4 Pipe Inlet=TA4 Rohrzulauf
+TA4 Pipe Inlet=TA4 Leitungszulauf
 one window maximum=maximal ein Fenster
 wrong diameter (should be 5, 7, or 9)=falscher Durchmesser (sollte 5, 7, oder 9 sein)
 wrong number of gravel nodes=falsche Anzahl von Kiesblöcken
 wrong number of shell nodes=falsche Anzahl von Blöcken bei der Hülle
+
+### inlets.lua ###
+
+TA4 Collider Cable Input=TA4 Collider Kabelausgang
+TA4 Collider Pipe Input=TA4 Collider Leitungseingang
+TA4 Collider Pipe Output=TA4 Collider Leitungsausgang
+TA4 Collider Tube Input=TA4 Collider Rohreneingang 
 
 ### inverter.lua ###
 
@@ -557,8 +730,14 @@ Block has an@nadditional wrench menu=Block besitzt ein@nzusätzliches@nSchrauben
 
 ### lib.lua ###
 ### sensorchest.lua ###
+### terminal.lua ###
 
 connected with=verbunden mit
+
+### light_detector.lua ###
+
+Send signal if light level is above:=Sende ein Signal wenn der Lichtwert größer ist als:
+TA3 Light Detector=TA3 Lichtdetektor
 
 ### lighter.lua ###
 
@@ -569,6 +748,11 @@ TA1 Lighter=TA1 Anzünder
 Allow public access to the tank=Erlaube öffentlichen Zugriff auf den Tank
 Liquid Tank=Flüssigkeitstank
 To add liquids punch@nthe tank@nwith a liquid container=Um Flüssigkeit nachzufüllen,@nschlage mit einem Flüssigkeitsbehälter@nauf den Block
+
+### liquid_lib.lua ###
+### ta4_chest.lua ###
+
+keep assignment=Zuordnung beibehalten
 
 ### liquid_pipe.lua ###
 
@@ -595,8 +779,8 @@ no usable water=Kein brauchbares Wasser
 @nRule:@n<output> @= on/off if <input-expression> is true@n=@nRegel:@n<output> @= on/off if <input-expression> is true@n
 @nThe internal processing time for all@ncommands is 100 ms.=@nDie interne Durchlaufzeit für alle@nKommandos beträgt 100 ms.
 @nValid operators:@nand   or   on   off   me   @=@=   ~@=   (   )@n=@nGültige Operatoren:@nand   or   on   off   @=@=   ~@=   (   )@n
-Blocking Time=Sperrzeit
-Help=Hilfe
+Clear=Löschen
+Debug=Debug
 Inputs=Eingänge
 Outputs=Ausgänge
 Rules=Regeln
@@ -606,15 +790,34 @@ Syntax=Syntax
 ### logic_block.lua ###
 ### lua_logic.lua ###
 
-Store=Speichern
 TA3 Logic Block=TA3 Logikblock
 Update=Update
+
+### logic_block.lua ###
+### sequencer2.lua ###
+
+Help=Hilfe
 
 ### lye.lua ###
 
 Lye=Lauge
 Lye Barrel=Lauge Fass
 Lye Canister=Lauge Kanister
+
+### magnet.lua ###
+
+TA4 Collider Detector Magnet=TA4 Collider Detektormagnet
+TA4 Collider Magnet=TA4 Collider Magnet
+TA4 Collider Magnet Base=TA4 Collider Magnetfuß
+TA4 Collider Steel Block=TA4 Collider Stahlblock
+TA5 Fusion Reactor Magnet 1=TA5 Fusionsreaktor Magnet 1
+TA5 Fusion Reactor Magnet 2=TA5 Fusionsreaktor Magnet 2
+TA5 Fusion Reactor Magnet Blank=TA5 Fusionsreaktor Magnetrohling
+TA5 Fusion Reactor Magnet Shield=TA5 Fusionsreaktor Magnetschild
+
+### mba_detector.lua ###
+
+TA4 Mapblock Active Detector=TA4 Aktiver Mapblock Detektor
 
 ### meltingpot.lua ###
 
@@ -667,6 +870,18 @@ TA1 Pine Wood Board=TA1 Kiefernholzbrett
 
 TA4 Streetlamp Solar Cell=TA4 Straßenlampen-Solarzelle
 
+### movecontroller.lua ###
+
+Error: Invalid distance !!=Fehler: Ungültige Entfernung !!
+Handover to A=Übergabe an A
+Handover to B=Übergabe an B
+Move distance (A to B)=Entfernung (A nach B)
+Number of the next movecontroller=Nummer des nächsten Move Controllers
+Number of the previous movecontroller=Nummer des vorhergehenden Move Controllers
+Object offset=Objekt Offset
+TA4 Move Controller=TA4 Move Controller
+Y-offset for non-player objects like vehicles (-0.5 to 0.5)=Y-Offset für Nicht-Spieler Objekte wie Fahrzeuge (-0.5 bis 0.5)
+
 ### node_detector.lua ###
 
 Send signal if nodes have been:=Sende ein Signal falls Blöcke:
@@ -692,6 +907,8 @@ TA3 Power Station Oil Burner=TA3 Kraftwerks-Ölbrenner
 
 ### petroleum.lua ###
 
+Isobutane Cylinder Large=Isobutangasflasche groß
+Isobutane Cylinder Small=Isobutangasflasche klein
 Propane Cylinder Large=Propangasflasche groß
 Propane Cylinder Small=Propangasflasche klein
 TA3 Bitumen=TA3 Bitumen
@@ -707,6 +924,7 @@ TA3 Naphtha=TA3 Naphtha
 TA3 Naphtha Barrel=TA3 Naphtha-Fass
 TA3 Naphtha Canister=TA3 Naphtha-Kanister
 TA3 Propane=TA3 Propan
+TA4 Isobutane=TA4 Isobutan
 
 ### pillar.lua ###
 
@@ -714,7 +932,7 @@ TA4 Pillar=TA4 Säule
 
 ### pipe_wall_entry.lua ###
 
-TA3 Pipe Wall Entry=TA3 Rohr/Wanddurchbruch
+TA3 Pipe Wall Entry=TA3 Leitungs/Wanddurchbruch
 
 ### pipe_wrench.lua ###
 
@@ -732,6 +950,7 @@ TA4 Player Detector=TA4 Spieler Detektor
 
 Aluminum Powder=Aluminium Pulver
 Clay Powder=Ton Pulver
+Graphite Powder=Graphitpulver 
 Iron Powder=Eisen Pulver
 Leave Powder=Laub Pulver
 Needle Powder=Nadel Pulver
@@ -750,7 +969,7 @@ TA Power Pole Top 2 (for landlines)=TA Strommastkopf 2 (für Überlandleitungen)
 
 ### power_terminal2.lua ###
 
-Commands@nhelp . . . print this text@ncls . . . . . clear screen@ngen . . . . print all generators@nsto . . . . . print all storage systems@n=Kommandos@nhelp . . . diesen Text ausgeben@ncls . . . . . Bildschirm löschen@ngen . . . . Alle Generatoren ausgeben@nsto . . . . . Alle Speichersysteme ausgeben@n
+Commands@nhelp . . . print this text@ncls . . . . . clear screen@ngen . . . . print all generators@nsto . . . . . print all storage systems@ncon . . . . . print main consumers@n=Kommandos@nhelp . . . diesen Text ausgeben@ncls . . . . . Bildschirm löschen@ngen . . . . Alle Generatoren ausgeben@nsto . . . . . Alle Speichersysteme ausgeben@ncon . . . . . Hauptverbraucher ausgeben@n
 Consumer=Verbraucher
 Network Data=Netzwerkdaten
 Number of consumers:=Anzahl der Verbraucher
@@ -794,6 +1013,12 @@ Allow to dig/place Techage power lines nearby power poles=Erlaubt TODO
 TA3 Pump=TA3 Pumpe
 TA4 Pump=TA4 Pumpe
 
+### pump.lua ###
+### ta5_pump.lua ###
+
+Total flow rate=Gesamtdurchfluss
+Total flow rate in liquid units=Gesamtdurchfluss in Flüssigkeitseinheiten
+
 ### pumpjack.lua ###
 
 Oil Pumpjack=Ölpumpe
@@ -823,6 +1048,7 @@ inventory full=Inventar ist voll
 TA3 Oil Reboiler=TA3 Aufkocher
 
 ### recipe_lib.lua ###
+### recipeblock.lua ###
 
 Recipe=Rezept
 
@@ -830,6 +1056,10 @@ Recipe=Rezept
 ### ta4_reactor.lua ###
 
 Catalyst=Katalysator
+
+### recipeblock.lua ###
+
+TA4 Recipe Block=TA4 Rezept Block
 
 ### recipes.lua ###
 
@@ -868,22 +1098,74 @@ TA4 Rotor Blade=TA4 Rotorblatt
 TA4 Wind Turbine=TA4 Windkraftanlage
 TA4 Wind Turbine Nacelle=TA4 Windkraftanlagengondel
 
+### screwdriver.lua ###
+
+Block alignment stored!=Blockausrichtung gespeichert!
+Techage Screwdriver@n(See: TA3 > Tools)=Techage Schraubendreher@n(Siehe: TA3 > Werkzeuge)
+
 ### sensorchest.lua ###
 
 Allow public chest access=Erlaube öffentlichen Zugriff
 TA4 Sensor Chest=Sensorkiste
-not connected=nicht verbunden
 
 ### sequencer.lua ###
 
 TA3 Sequencer=TA3 Sequenzer
+
+### sequencer.lua ###
+### sequencer2.lua ###
+
 stopped=gestoppt
+
+### sequencer2.lua ###
+
+ - 'goto <num>'  (jump to another line)@n= - 'goto <num>'  (springe zu einer anderen Zeile)@n
+ - 'send <node num> <cmnd>' (techage command)@n= - 'send <node num> <cmnd>' (techage Kommando)@n
+ - 'stop' (stop the execution)@n= - 'stop' (stoppe die Ausführung)@n
+ - 1 corresponds to 100 ms@n= - 1 entspricht 100 ms@n
+ - 50000 corresponds to 4 game days@n= - 50000 entspricht 4 Spieltagen@n
+'[<num>] <command>'@n='[<num>] <command>'@n
+<command> is one of the following:@n=<command> ist eines der folgenden:@n
+<num> is a number from 1 to 50000 and is@n=<num> ist eine Nummer von 1 bis 50000 und ist@n
+@n=@n
+Commands=Kommandos
+Example:@n=Beispiel:
+Invalid command!=Ungültiges Kommando!
+Start=Start
+Stop=Stopp
+Syntax:@n=Syntax:@n
+TA4 Sequencer=TA4 Sequenzer
+running=läuft
+the timeslot when the command is executed.@n=der Zeitpunkt, wenn der Befehl ausgeführt wird.@n
+
+### sequencer2.lua ###
+### submenu.lua ###
+
+Cancel=Abbruch
+
+### shell.lua ###
+
+TA5 Fusion Reactor Nucleus=TA5 Fusionsreaktor Kern
+TA5 Fusion Reactor Shell=TA5 Fusionsreaktor Hülle
 
 ### signallamp.lua ###
 
 TA4 Wind Turbine Signal Lamp=TA4 Windkraftanlagenlampe
 TechAge Signal Lamp=TechAge Signallampe
 TechAge Signal Lamp (can be colored)=TechAge Signallampe (kann gefärbt werden)
+
+### signallamp_2x.lua ###
+
+TA4 2x Signal Lamp=TA4 2x Signallampe
+
+### signallamp_2x.lua ###
+### signallamp_4x.lua ###
+
+Label for the lamp=Bezeichner der Lampe
+
+### signallamp_4x.lua ###
+
+TA4 4x Signal Lamp=TA4 4x Signallampe
 
 ### silicon.lua ###
 
@@ -902,7 +1184,6 @@ TA Lamp=TA Lampe
 
 TA1 Sluice Gate=TA1 Schleusenschieber
 TA1 Sluice Handle=TA1 Schleusengriff
-Your pond is too small!=Der Teich ist zu klein!
 
 ### solarcell.lua ###
 
@@ -916,6 +1197,11 @@ light=Licht
 ### source.lua ###
 
 power=Strom
+
+### soundblock.lua ###
+
+Play=Abspielen
+TA3 Sound Block=TA3 Sound Block
 
 ### source.lua ###
 
@@ -948,7 +1234,6 @@ TA4 LED Street Lamp Pole=TA4 LED Lampenmast
 
 ### submenu.lua ###
 
-Cancel=Abbruch
 Note: You can't change any values while the block is running!=Hinweis: Während der Block läuft, kann kein Wert geändert werden!
 Refresh=Aktualisieren
 
@@ -982,7 +1267,6 @@ Size=Größe
 TA4 8x2000 Chest=TA4 8x2000 Kiste
 Unlock=Entsperren
 Unlock connected chest@nif all slots are below 2000=Nachfolgende Kiste entsperren,@nsofern alle Speicherplätze <= 2000
-keep assignment=Zuordnung beibehalten
 right to left=von rechts nach links
 
 ### ta4_doser.lua ###
@@ -1028,6 +1312,18 @@ on=an
 
 no power=kein Strom
 
+### ta5_chest.lua ###
+
+TA5 Hyperloop Chest=TA5 Hyperloop Kiste
+
+### ta5_pump.lua ###
+
+TA5 Pump=TA5 Pumpe
+
+### ta5_tank.lua ###
+
+TA5 Hyperloop Tank=TA5 Hyperloop Tank
+
 ### tank.lua ###
 
 Oil Tank=Öltank
@@ -1038,12 +1334,34 @@ TA4 Tank=TA4 Tank
 
 TA Tank Cart=TA Tankwagen
 
+### teleport.lua ###
+
+Connected=Verbunden
+Connection status=Verbindungsstatus
+Distance > @1 blocks=Abstand > @1 Blöcke
+Ex-points missing (@1 < @2)=Erf.-Punkte fehlen  (@1 < @2)
+Status=Status
+server not connected=Server nicht verbunden
+
+### teleport_pipe.lua ###
+
+TA5 Teleport Block Liquids=TA5 Teleport Block Flüssigkeiten
+
+### teleport_pipe.lua ###
+### teleport_tube.lua ###
+
+Remote block error=Fehler entfernter Block 
+
+### teleport_tube.lua ###
+
+TA5 Teleport Block Items=TA5 Teleport Block Gegenstände
+
 ### terminal.lua ###
 
-Switched to private use!=Zur privaten Nutzung umgeschaltet
-Switched to public use!=Zur öffentlichen Nutzung umgeschaltet
 Syntax error, try help=Syntax Fehler, nutze help
 TA3 Terminal=TA3 Terminal
+TA4 Collider Terminal=TA4 Collider Terminal
+TA4 Terminal=TA4 Terminal
 commands like: help=Kommandos wie: help
 
 ### timer.lua ###
@@ -1074,7 +1392,7 @@ TechAge Trowel=TechAge Kelle
 
 ### tube_wall_entry.lua ###
 
-Tube Wall Entry=Tube Wanddurchbruch
+Tube Wall Entry=Röhrenwanddurchbruch
 
 ### tubes.lua ###
 
@@ -1088,21 +1406,28 @@ TA4 Tube=TA4 Röhre
 
 TA3 Turbine=TA3 Turbine
 TA4 Turbine=TA4 Turbine
+TA5 Turbine=TA5 Turbine
+
+### turncontroller.lua ###
+
+Click on all blocks that shall be turned=Klicke auf all Blöcke, die gedreht werden sollen
+TA4 Turn Controller=TA4 Dreh Controller
+Turn left=Drehe links
+Turn right=Drehe rechts
 
 ### usmium.lua ###
 
 Usmium Nuggets=Usmium Nuggets
 Usmium Powder=Usmium Pulver
 
+### vacuumtube.lua ###
+
+TA4 Vacuum Tube=TA4 Vakuumröhre
+
 ### valve.lua ###
 
 TA Valve=TA Ventil
 TA3 Valve=TA3 Ventil
-
-### water.lua ###
-
-Flowing Water=Fließendes Wasser
-Water Source=Wasserquelle
 
 ### waterinlet.lua ###
 
@@ -1132,3 +1457,12 @@ This is not the surface of the ocean!=Das ist nicht die Meeresoberfläche!
 [TA4 Wind Turbine]=[TA4 Windkraftanlage]
 biome and no ocean!=Biom und keine Meer (ocean)!
 is a suitable place for a wind turbine!=ist ein geeigneter Ort für eine Windkraftanlage!
+
+### worker.lua ###
+
+Build detector=Baue Detektor
+Item list=Teileliste
+Remove detector=Entferne Detektor
+TA4 Collider Detector Worker=TA4 Collider Detektor Worker
+[TA4] Detector is being built!=[TA4] Detektor wird gebaut! 
+[TA4] Detector is being removed!=[TA4] Detektor wird  entfernt!

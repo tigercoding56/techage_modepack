@@ -117,12 +117,14 @@ techage.manual_EN.aTitel = {
   "3,Door/Gate Blocks",
   "3,TA3 Door Controller",
   "3,TA3 Door Controller II",
+  "3,TA3 Sound Block",
   "3,TA3 Mesecons Converter",
   "2,Detectors",
   "3,TA3 Detector",
   "3,TA3 Cart Detector",
   "3,TA3 Block Detector",
   "3,TA3 Player Detector",
+  "3,TA3 Light Detector",
   "2,TA3 Machines",
   "3,TA3 Pusher",
   "3,TA3 Distributor",
@@ -138,7 +140,8 @@ techage.manual_EN.aTitel = {
   "3,TechAge Programmer",
   "3,TechAge Trowel / Trowel",
   "3,TA3 drill pipe wrench",
-  "1,TA4: Future",
+  "3,Techage Screwdriver",
+  "1,TA4: Present",
   "2,Wind Turbine",
   "3,TA4 Wind Turbine",
   "3,TA4 Wind Turbine Nacelle",
@@ -183,9 +186,17 @@ techage.manual_EN.aTitel = {
   "3,TA4 Lua Controller Terminal",
   "2,TA4 Logic/Switching Modules",
   "3,TA4 Button/Switch",
+  "3,TA4 2x Button",
+  "3,TA4 4x Button",
+  "3,TA4 2x Signal Lamp",
+  "3,TA4 4x Signal Lamp",
   "3,TA4 Player Detector",
   "3,TA4 State Collector",
   "3,TA4 Detector",
+  "3,TA4 Sequencer",
+  "2,Move/Turn Controller",
+  "3,TA4 Move Controller",
+  "3,TA4 Turn Controller",
   "2,TA4 Lamps",
   "3,TA4 LED Grow Light",
   "3,TA4 Street Lamp",
@@ -194,7 +205,13 @@ techage.manual_EN.aTitel = {
   "3,Base Layer",
   "3,Gravel Layer",
   "3,Filling Layer",
+  "2,TA4 Collider (Particle Accelerator)",
+  "3,Detector",
+  "3,Control / TA4 Terminal",
+  "3,Construction",
   "2,More TA4 Blocks",
+  "3,TA4 Recipe Block",
+  "3,TA4 Autocrafter",
   "3,TA4 Tank",
   "3,TA4 Pump",
   "3,TA4 Furnace Heater",
@@ -212,10 +229,33 @@ techage.manual_EN.aTitel = {
   "3,TA4 Electronic Fab",
   "3,TA4 Injector",
   "3,TA4 Recycler",
+  "1,TA5: Future",
+  "2,Energy Sources",
+  "3,TA5 Fusion Reactor",
+  "4,TA5 Fusion Reactor Magnet",
+  "4,TA5 Pump",
+  "4,TA5 Heat Exchanger",
+  "4,TA5 Fusion Reactor Controller",
+  "4,TA5 Fusion Reactor Shell",
+  "4,TA5 Fusion Reactor Core",
+  "2,Energy Storage",
+  "3,TA5 Hybrid Storage (planned)",
+  "2,Logic blocks",
+  "2,Transport and Traffic",
+  "3,TA5 Flight Controller",
+  "3,TA5 Hyperloop Chest",
+  "3,TA5 Hyperloop Tank",
+  "2,Teleport Blocks",
+  "3,TA5 Teleport Block Items",
+  "3,TA5 Teleport Block Liquids",
+  "3,Hyperloop Teleport Blocks (planned)",
+  "2,More TA5 Blocks/Items",
+  "3,TA5 Container (planned)",
+  "3,TA5 AI Chip",
 }
 
 techage.manual_EN.aText = {
-  "Tech Age is a technology mod with 4 development stages:\n"..
+  "Tech Age is a technology mod with 5 development stages:\n"..
   "\n"..
   "TA1: Iron Age\n"..
   "Use tools and aids such as coal burners\\, coal burners\\, gravel sieves\\, hammers and hoppers to mine and process the necessary ores and metals.\n"..
@@ -226,8 +266,11 @@ techage.manual_EN.aText = {
   "TA3: Oil Age\n"..
   "Find and extract oil\\, built railways for oil transportation. A power plant provides the necessary electricity for your machines. Electric light illuminates your industrial plants.\n"..
   "\n"..
-  "TA4: Future Age\n"..
+  "TA4: Present\n"..
   "Renewable energy sources such as wind\\, sun and biofuels help you to leave the oil age. With modern technologies and intelligent machines you set out into the future.\n"..
+  "\n"..
+  "TA5: Future\n"..
+  "Machines to overcome space and time\\, new sources of energy and other achievements shape your life.\n"..
   "\n"..
   "Note: With a click on the plus sign you get into the subchapters of this manual.\n"..
   "\n"..
@@ -1101,11 +1144,27 @@ techage.manual_EN.aText = {
   "\n",
   "The Door Controller II can remove and set all types of blocks. To teach in the Door Controller II\\, the \"Record\" button must be pressed. Then all blocks that should be part of the door / gate must be clicked. Then the \"Done\" button must be pressed. Up to 16 blocks can be selected. The removed blocks are saved in the controller's inventory. The function of the controller can be tested manually using the \"Remove\" or \"Set\" buttons. If an 'on' /'off' command is sent to the Door Controller II\\, it removes or sets the blocks as well.\n"..
   "\n"..
-  "Individual blocks can be set\\, removed or replaced by other blocks via an 'exchange' command. The slot number of the inventory (1 .. 16) must be transferred as payload\\, i.e.:\n"..
+  "With '$send_cmnd(node_number\\, \"exchange\"\\, 2)' individual blocks can be set\\, removed or replaced by other blocks from the inventory. \n"..
   "\n"..
-  "    $send_cmnd(node_number\\, \"exchange\"\\, 2)\n"..
+  "With '$send_cmnd(node_number\\, \"set\"\\, 2)' a block from the inventory can be set explicitly\\, as long as the inventory slot is not empty.\n"..
+  "\n"..
+  "A block can be removed again with '$send_cmnd(node_number\\, \"dig\"\\, 2)' if the inventory slot is empty. \n"..
+  "\n"..
+  "The name of the set block is returned with '$send_cmnd(node_number\\, \"get\"\\, 2)'.\n"..
+  "\n"..
+  "The slot number of the inventory (1 .. 16) must be passed as payload in all three cases.\n"..
   "\n"..
   "This can also be used to simulate extendable stairs and the like. \n"..
+  "\n"..
+  "\n"..
+  "\n",
+  "Different sounds can be played with the sound block. All sounds of the Mods Techage\\, Signs Bot\\, Hyperloop\\, Unified Inventory\\, TA4 Jetpack and Minetest Game are available.\n"..
+  "\n"..
+  "The sounds can be selected and played via the menu and via command.\n"..
+  "\n"..
+  "  - Command 'on' to play a sound\n"..
+  "  - Command 'sound <idx>' to select a sound via the index\n"..
+  "  - Command 'gain <volume>' to adjust the volume via the '<volume>' value (1 to 5).\n"..
   "\n"..
   "\n"..
   "\n",
@@ -1125,6 +1184,7 @@ techage.manual_EN.aText = {
   "The detector is a special tube block that detects when items are passed on through the tube. To do this\\, it must be connected to tubes on both sides. If items are pushed into the detector with a pusher\\, they are automatically passed on.\n"..
   "It sends an 'on' when an item is recognized\\, followed by an 'off' a second later.\n"..
   "Then further commands are blocked for 8 seconds.\n"..
+  "The waiting time and the items that should trigger a command can be configured using the open-ended wrench menu. \n"..
   "\n"..
   "\n"..
   "\n",
@@ -1140,6 +1200,11 @@ techage.manual_EN.aText = {
   "\n",
   "The player detector sends an 'on' command if it detects a player within 4 m of the block. If the player leaves the area again\\, an 'off' command is sent.\n"..
   "If the search should be limited to specific players\\, these player names can also be entered.\n"..
+  "\n"..
+  "\n"..
+  "\n",
+  "The light detector sends an 'on' command if the light level of the block above exceeds a certain level\\, which can be set through the right-click menu.\n"..
+  "If you have a TA4 Lua Controller\\, you can get the exact light level with $get_cmd(num\\, 'light_level')\n"..
   "\n"..
   "\n"..
   "\n",
@@ -1200,7 +1265,7 @@ techage.manual_EN.aText = {
   "\n"..
   "\n",
   "",
-  "The Techage Info Tool (wrench) has several functions. It shows the time\\, position\\, temperature and biome when an unknown block is clicked on.\n"..
+  "The Techage Info Tool (open-ended wrench) has several functions. It shows the time\\, position\\, temperature and biome when an unknown block is clicked on.\n"..
   "If you click on a TechAge block with command interface\\, all available data will be shown (see also \"Logic / switching blocks\").\n"..
   "\n"..
   "With Shift + right click an extended menu can be opened for some blocks. Depending on the block\\, further data can be called up or special settings can be made here. In the case of a generator\\, for example\\, the charging curve/switch-off can be programmed. \n"..
@@ -1219,6 +1284,15 @@ techage.manual_EN.aText = {
   "This tool can be used to remove the drill pipe blocks if\\, for example\\, a tunnel is to pass through there.\n"..
   "\n"..
   "\n"..
+  "\n",
+  "The Techage Screwdriver serves as a replacement for the normal screwdriver. It has the following functions:\n"..
+  "\n"..
+  "  - Left click: turn the block to the left\n"..
+  "  - Right click: turn the visible side of the block upwards\n"..
+  "  - Shift + left click: save the alignment of the clicked block\n"..
+  "  - Shift + right click: apply the saved alignment to the clicked block\n"..
+  "\n"..
+  " \n"..
   "\n",
   "Renewable energy sources such as wind\\, sun and biofuels help you to leave the oil age. With modern technologies and intelligent machines you set out into the future.\n"..
   "\n"..
@@ -1430,9 +1504,9 @@ techage.manual_EN.aText = {
   "Cracking breaks long chains of hydrocarbons into short chains using a catalyst.\n"..
   "Gibbsite powder serves as a catalyst (is not consumed). It can be used to convert bitumen into fueloil\\, fueloil into naphtha and naphtha into gasoline.\n"..
   "\n"..
-  "In hydrogenation\\, pairs of hydrogen atoms are added to a molecule to convert short-chain hydrocarbons into long ones. \n"..
-  "Here iron powder is required as a catalyst (is not consumed). It can be used to convert gasoline into naphtha\\,\n"..
-  "naphtha into fueloil\\, and fueloil into bitumen.\n"..
+  "In hydrogenation\\, pairs of hydrogen atoms are added to a molecule to convert short-chain hydrocarbons into long ones.\n"..
+  "Here iron powder is required as a catalyst (is not consumed). It can be used to convert gas (propane) into isobutane\\,\n"..
+  "isobutane into gasoline\\, gasoline into naphtha\\, naphtha into fueloil\\, and fueloil into bitumen.\n"..
   "\n"..
   "\n"..
   "\n",
@@ -1556,6 +1630,32 @@ techage.manual_EN.aText = {
   "\n"..
   "\n"..
   "\n",
+  "This block has two buttons that can be individually configured using the wrench menu. The labeling and the target block address can be configured for each button. In addition\\, the command that is to be sent can be configured for each button. \n"..
+  "\n"..
+  "\n"..
+  "\n",
+  "This block has four buttons that can be individually configured using the wrench menu. The labeling and the target block address can be configured for each button. In addition\\, the command that is to be sent can be configured for each button. \n"..
+  "\n"..
+  "\n"..
+  "\n",
+  "This block has two lamps that can be controlled individually. Each lamp can display the colors \"red\"\\, \"green\" and \"amber\". The labeling for both lamps can be configured via the wrench menu. The lamps can be controlled using the following commands:\n"..
+  "\n"..
+  "  - Switch lamp 1 to red: '$send_cmnd(1234\\, \"red\"\\, 1)'\n"..
+  "  - Switch lamp 2 to green: '$send_cmnd(1234\\, \"green \"\\, 2)'\n"..
+  "  - Switch lamp 1 to orange: '$send_cmnd(1234\\, \"amber\"\\, 1)'\n"..
+  "  - Switch lamp 2 off: '$send_cmnd(1234\\, \"off\"\\, 2)'\n"..
+  "\n"..
+  "\n"..
+  "\n",
+  "This block has four lamps that can be controlled individually. Each lamp can display the colors \"red\"\\, \"green\" and \"amber\". The labeling for all lamps can be configured via the wrench menu. The lamps can be controlled using the following commands:\n"..
+  "\n"..
+  "  - Switch lamp 1 to red: '$send_cmnd(1234\\, \"red\"\\, 1)'\n"..
+  "  - Switch lamp 2 to green: '$send_cmnd(1234\\, \"green \"\\, 2)'\n"..
+  "  - Switch lamp 3 to orange: '$send_cmnd(1234\\, \"amber\"\\, 3)'\n"..
+  "  - Switch lamp 4 off: '$send_cmnd(1234\\, \"off\"\\, 4)'\n"..
+  "\n"..
+  "\n"..
+  "\n",
   "Only the appearance of the TA4 player detector has changed. The functionality is the same as with the TA3 player detector.\n"..
   "\n"..
   "\n"..
@@ -1566,6 +1666,72 @@ techage.manual_EN.aText = {
   "\n",
   "The functionality is the same as for the TA3 detector. In addition\\, the detector counts the items passed on.\n"..
   "This counter can be queried with the 'count' command and reset with 'reset'.\n"..
+  "\n"..
+  "\n"..
+  "\n",
+  "Entire processes can be programmed using the TA4 sequencer. Here's an example:\n"..
+  "\n"..
+  "    -- this is a comment\n"..
+  "    \\[1\\] send 1234 a2b\n"..
+  "    \\[30\\] send 1234 b2a\n"..
+  "    \\[60\\] goto 1\n"..
+  "\n"..
+  "  - Each line begins with a number which corresponds to a point in time '\\[<num>\\]'\n"..
+  "  - Values from 1 to 50000 are permitted for times\n"..
+  "  - 1 corresponds to 100 ms\\, 50000 corresponds to about 4 game days\n"..
+  "  - Empty lines or comments are allowed ('-- comment')\n"..
+  "  - With 'send <num> <command> <data>' you can send a command to a block\n"..
+  "  - With 'goto <num>' you can jump to another line / point in time\n"..
+  "  - With 'stop' you can stop the sequencer with a delay so that it does not receive a new command\naccepts from a button or other block (to complete a movement)\nWithout 'stop'\\, the sequencer goes into stopped mode immediately after the last command.\n"..
+  "\n"..
+  "The TA4 sequencer supports the following techage commands:\n"..
+  "\n"..
+  "  - 'goto <num>' Jump to a command line and start the sequencer\n"..
+  "  - 'stop' Stop the sequencer\n"..
+  "  - 'on' and 'off' as aliases for 'goto 1' resp. 'stop'\n"..
+  "\n"..
+  "The 'goto' command is only accepted when the sequencer is stopped.\n"..
+  "\n"..
+  "\n"..
+  "\n",
+  "",
+  "The TA4 Move Controller is similar to \"Door Controller 2\"\\, but the selected blocks are not removed\\, but can be moved.\n"..
+  "Since the moving blocks can take players and mobs standing on the block with them\\, elevators and similar transport systems can be built with them.\n"..
+  "\n"..
+  "Instructions:\n"..
+  "\n"..
+  "  - Set the controller and train the blocks to be moved via the menu (up to 16 blocks can be trained)\n"..
+  "  - the \"flight route\" must be entered via an x\\, y\\, z specification (relative) (the maximum distance is 100 m)\n"..
+  "  - The movement can be tested with the menu buttons \"Move A-B\" and \"Move B-A\"\n"..
+  "  - you can also fly through walls or other blocks\n"..
+  "  - The target position for the blocks can also be occupied. In this case\\, the blocks are saved \"invisibly\". This is intended for sliding doors and the like\n"..
+  "  - A \"handover\" can also be programmed in the controller via the open-ended wrench menu. By entering a block number\\, the blocks are then transferred to the next move controller. In this way\\, connected movements can also be implemented using several Move Controllers.\n"..
+  "\n"..
+  "The Move Controller supports the following techage commands:\n"..
+  "\n"..
+  "  - 'a2b' Move block from A to B.\n"..
+  "  - 'b2a' Move block from B to A.\n"..
+  "  - 'move' Move block to the other side\n"..
+  "\n"..
+  "*Important instructions:*\n"..
+  "\n"..
+  "  - If several blocks are to be moved\\, the block that is to take the players/mobs must be clicked first when training.\n"..
+  "  - If the block that is supposed to take the players/mobs has a reduced height\\, the height must be set in the controller using the open-ended wrench menu (e.g. height = 0.5). Otherwise the player/mob will not be \"found\" and will not be taken away.\n"..
+  "\n"..
+  "\n"..
+  "\n",
+  "The TA4 turn controller is similar to the \"Move Controller\"\\, but the selected blocks are not moved\\, but rotated around their center to the right or left.\n"..
+  "\n"..
+  "Instructions:\n"..
+  "\n"..
+  "  - Set the controller and train the blocks to be moved via the menu (up to 16 blocks can be trained)\n"..
+  "  - The movement can be tested with the menu buttons \"Turn left\" and \"Turn right\"\n"..
+  "\n"..
+  "The turn controller supports the following techage commands:\n"..
+  "\n"..
+  "  - 'left' Turn left\n"..
+  "  - 'right' Turn right\n"..
+  "  - 'uturn' Turn 180 degrees\n"..
   "\n"..
   "\n"..
   "\n",
@@ -1621,7 +1787,99 @@ techage.manual_EN.aText = {
   "\n"..
   "\n"..
   "\n",
+  "The Collider is a research facility that conducts basic research. Experience points can be collected here\\, which are required for TA5 (Future Age).\n"..
+  "\n"..
+  "Like its original at CERN in Geneva\\, the collider must be built underground. The standard setting here is Y <= -28. The value can\\, however\\, be changed by the server personnel via configuration. Please ask or try the \"TA4 Collider Detector Worker\" block.\n"..
+  "\n"..
+  "Only one collider can be operated per player. So it makes no sense to set up two or more colliders. Experience points are credited to the player who owns the collider. The experience points cannot be transferred.\n"..
+  "\n"..
+  "A collider consists of a \"ring\" made of tubes and magnets as well as a detector with a cooling system.\n"..
+  "\n"..
+  "  - The detector is the heart of the system. This is where the scientific experiments take place. The detector is 3x3x7 blocks in size.\n"..
+  "  - The TA4 Collider Detector magnets (22 pieces) must be connected to each other via 5 blocks of the TA4 vacuum tube. Each magnet also requires electricity and a gas connection for cooling. The whole thing forms (as shown in the plan on the right) a square with an edge length of 37 meters.\n"..
+  "  - In addition\\, cooling is required\\, which must also be installed at the detector. Isobutane is required for cooling.\n"..
+  "  - The system requires quite a bit of electricity. Therefore\\, it makes sense to have your own power supply.\n"..
+  "\n"..
+  "The plan shows the facility from above:\n"..
+  "\n"..
+  "  - the gray block is the detector with the worker block in the middle\n"..
+  "  - the red blocks are the magnets\\, the blue the vacuum tubes\n"..
+  "\n"..
+  "\n"..
+  "\n",
+  "The detector is set up automatically with the help of the \"TA4 Collider Detector Worker\" block (similar to the derrick). All of the materials required for this must first be placed in the worker block. The detector is shown symbolically on the worker block. The detector is set up across the worker block.\n"..
+  "\n"..
+  "The detector can also be dismantled again with the help of the worker block.\n"..
+  "\n"..
+  "The connections for electricity\\, gas and vacuum tubes are located on the two front sides of the detector. A TA4 pump must be connected at the top in order to suck the tube empty / to create the vacuum.\n"..
+  "\n"..
+  "The cooling system must be connected to the rear of the detector. The cooling system is shown in the plan on the right. In addition to the TA4 heat exchanger of the energy storage unit (which is used here for cooling)\\, a TA4 cooler block is also required.\n"..
+  "\n"..
+  "Note: The arrow on the heat exchanger must point away from the detector. The heat exchanger must also be supplied with electricity.\n"..
+  "\n"..
+  "\n"..
+  "\n",
+  "The collider is controlled via a TA4 terminal (not via the TA4 Lua controller terminal).\n"..
+  "\n"..
+  "This terminal must be connected to the detector. The number of the detector is displayed as info text on the worker block.\n"..
+  "\n"..
+  "The terminal supports the following commands:\n"..
+  "\n"..
+  "  - 'connect <number>' (connect to the detector)\n"..
+  "  - 'start' (starting the detector)\n"..
+  "  - 'stop' (stop the detector)\n"..
+  "  - 'test <number>' (checking a magnet)\n"..
+  "  - 'points' (query of the experience points already achieved)\n"..
+  "\n"..
+  "If an error occurs on a magnet during the 'start'\\, the number of the magnet is output. The 'test' command can be used to request further information on the magnet error.\n"..
+  "\n"..
+  "\n"..
+  "\n",
+  "In addition to the building blocks\\, the following is required for the collider:\n"..
+  "\n"..
+  "  - electricity (145 ku)\n"..
+  "  - TA4 tank with at least 250 units of isobutane\n"..
+  "\n"..
+  "The following sequence is recommended when setting up the collider:\n"..
+  "\n"..
+  "  - Put a forceload block. Only the detector with the cooling system has to be in the area of ​​the forceload block.\n"..
+  "  - Set the worker block\\, fill it with items and set up the detector via the menu\n"..
+  "  - Build the ring with tubes and magnets\n"..
+  "  - Connect all magnets and the detector with power cables\n"..
+  "  - Connect all magnets and the detector with the yellow tubes and pump the isobutane into the tube system with a pump\n"..
+  "  - Install a TA4 pump as a vacuum pump on the detector and switch it on (no additional tank is required). If the pump goes into \"standby\"\\, the vacuum is established. This will take a few seconds\n"..
+  "  - assemble the cooler (heat exchanger) and connect it to the power cable\n"..
+  "  - Place the TA4 terminal in front of the detector and connect it to the detector via 'connect <number>'\n"..
+  "  - Switch on / connect the power supply\n"..
+  "  - switch on the cooler (heat exchanger)\n"..
+  "  - Switch on the detector via 'start' on the TA4 terminal. After a few test steps\\, the detector goes into normal operation or outputs an error.\n"..
+  "  - The collider has to run continuously and then gradually delivers experience points. For 10 points\\, the collider has to run for a few hours\n"..
+  "\n"..
+  "\n"..
+  "\n",
   "",
+  "Up to 10 recipes can be saved in the recipe block. These recipes can then be called up via a TA4 Autocrafter command. This enables the autocrafter's recipe to be configured using a command. The recipes in the recipe block can also be queried directly using a command.\n"..
+  "\n"..
+  "'input <index>' reads a recipe from the TA4 recipe block. '<index>' is the number of the recipe. The block returns a list of recipe ingredients.\n"..
+  "\n"..
+  "Example: '$send_cmnd(1234\\, \"input\"\\, 1)'\n"..
+  "\n"..
+  " \n"..
+  "\n",
+  "The function corresponds to that of TA3.\n"..
+  "\n"..
+  "The processing power is 4 items every 4 s. The autocrafter requires 9 ku of electricity for this.\n"..
+  "\n"..
+  "In addition\\, the TA4 Autocrafter supports the selection of different recipes using the following commands:\n"..
+  "\n"..
+  "'recipe <number>.<index>' switches the autocrafter to a recipe from the TA4 Recipe Block. '<number>' is the number of the recipe block\\, '<index>' the recipe number. Example: '$send_cmnd(1234\\, \"recipe\"\\, 5467.1)'\n"..
+  "\n"..
+  "Alternatively\\, a recipe can also be selected via the list of ingredients\\, such as:\n"..
+  "'$send_cmnd(1234\\, \"recipe\"\\, \"default:coal_lump\\,\\,\\,default:stick\")'\n"..
+  "All technical names of a recipe must be specified here\\, separated by commas. See also the command 'input' in the TA4 recipe block.\n"..
+  "\n"..
+  " \n"..
+  "\n",
   "See TA3 tank.\n"..
   "\n"..
   "A TA4 tank can hold 2000 units or 200 barrels of liquid.\n"..
@@ -1630,7 +1888,7 @@ techage.manual_EN.aText = {
   "\n",
   "See TA3 pump.\n"..
   "\n"..
-  "The TA4 pump pumps 8 units of liquid every two seconds.\n"..
+  "The TA4 pump pumps 8 units of liquid every two seconds. The pump also supports the 'flowrate' command. This means that the total flow rate through the pump can be queried. \n"..
   "\n"..
   "\n"..
   "\n",
@@ -1658,7 +1916,7 @@ techage.manual_EN.aText = {
   "\n"..
   "The TA4 pusher has two additional commands for the Lua controller:\n"..
   "\n"..
-  "  - 'config' is used to configure the pusher\\, analogous to manual configuration via the menu.\nExample: '$send_cmnd(1234\\, \"config\"\\, \"default: dirt\")'\n"..
+  "  - 'config' is used to configure the pusher\\, analogous to manual configuration via the menu.\nExample: '$send_cmnd(1234\\, \"config\"\\, \"default: dirt\")'\nWith '$send_cmnd(1234\\, \"config\"\\, \"\")' the configuration is deleted\n"..
   "  - 'pull' is used to send an order to the pusher:\nExample: '$send_cmnd(1234\\, \"pull\"\\, \"default: dirt 8\")'\nValues ​​from 1 to 12 are permitted as numbers. Then the pusher goes back to 'stopped' mode and sends an\" off \"command back to the transmitter of the\" pull \"command.\n"..
   "\n"..
   "\n"..
@@ -1745,6 +2003,124 @@ techage.manual_EN.aText = {
   "The processing power is one item every 8 s.  The block requires 16 ku of electricity for this.\n"..
   "\n"..
   " \n"..
+  "\n",
+  "Machines to overcome space and time\\, new sources of energy and other achievements shape your life.\n"..
+  "\n"..
+  "Experience points are required for the manufacture and use of TA5 machines and blocks. These can only be worked out using the collider from TA4.\n"..
+  "\n"..
+  "\n"..
+  "\n",
+  "",
+  "Nuclear fusion means the fusing of two atomic nuclei. Depending on the reaction\\, large amounts of energy can be released. Nuclear fusions\\, in which energy is released\\, take place in the form of chain reactions. They are the source of the energy of the stars\\, including our sun\\, for example. A fusion reactor converts the energy released during controlled nuclear fusion into electricity.\n"..
+  "\n"..
+  "*How ​​do fusion reactors work?*\n"..
+  "\n"..
+  "A fusion reactor works according to the classic principle of a thermal power plant: water is heated and drives a steam turbine\\, whose kinetic energy is converted into electricity by a generator.\n"..
+  "\n"..
+  "A fusion power plant initially requires a large amount of energy\\, since a plasma has to be generated. \"Plasma\" is the name given to the fourth state of matter\\, after solid\\, liquid and gaseous. This requires a lot of electricity. Only through this extreme concentration of energy does the fusion reaction ignite and the heat given off is used to generate electricity via the heat exchanger. The generator then delivers 800 ku of electricity.\n"..
+  "\n"..
+  "The plan on the right shows a section through the fusion reactor.\n"..
+  "\n"..
+  "60 experience points are required to operate the fusion reactor. The fusion reactor must be built entirely in a forceload block area.\n"..
+  "\n"..
+  "\n"..
+  "\n",
+  "A total of 60 TA5 Fusion Reactor Magnets are required to set up the fusion reactor. These form the ring in which the plasma forms. The TA5 Fusion Reactor Magnets requires power and has two ports for cooling.\n"..
+  "\n"..
+  "There are two types of magnets\\, so all sides of the magnet that face the plasma ring can also be protected with a heat shield.\n"..
+  "\n"..
+  "With the corner magnets on the inside of the ring\\, one connection side is covered (power or cooling) and can therefore not be connected. This is technically not feasible and therefore has no influence on the function of the fusion reactor. \n"..
+  "\n"..
+  "\n"..
+  "\n",
+  "The pump is required to fill the cooling circuit with isobutane. About 350 units of isobutane are required.\n"..
+  "\n"..
+  "\n"..
+  "\n",
+  "The TA5 Heat Exchanger is required to convert the heat generated in the fusion reactor first to steam and then to electricity. The Heat Exchanger itself requires 5 ku electricity. The structure is similar to the Heat Exchanger of the energy store from TA4.\n"..
+  "\n"..
+  "\n"..
+  "\n",
+  "The fusion reactor is switched on via the TA5 Fusion Reactor Controller. The cooling/Heat Exchanger must be switched on first and then the controller. It takes about 2 minutes for the reactor to start up and supply electricity. The fusion reactor and thus the controller requires 400 ku of electricity to maintain the plasma.\n"..
+  "\n"..
+  "\n"..
+  "\n",
+  "The entire reactor must be surrounded by a shell that absorbs the enormous pressure that the magnets exert on the plasma and protects the environment from radiation. Without this shell\\, the reactor cannot be started. With the TechAge Trowel\\, power cables and cooling pipes of the fusion reactor can also be integrated into the shell.\n"..
+  "\n"..
+  "\n"..
+  "\n",
+  "The core must sit in the center of the reactor. See illustration under \"TA5 Fusion Reactor\". The TechAge Trowel is also required for this.\n"..
+  "\n"..
+  "\n"..
+  "\n",
+  "",
+  "",
+  "",
+  "",
+  "The TA5 Flight Controller is similar to the TA4 Move Controller. In contrast to the TA4 Move Controller\\, several movements can be combined into one flight route. This flight route can be defined in the input field using several x\\,y\\,z entries (one movement per line). The flight route is checked and saved via \"Save\". In the event of an error\\, an error message is issued.\n"..
+  "\n"..
+  "With the \"Test\" button\\, the flight route with the absolute coordinates is output for checking in the chat.\n"..
+  "\n"..
+  "The maximum distance for the entire flight distance is 500 m.\n"..
+  "\n"..
+  "The use of the TA5 Flight Controller requires 40 experience points.\n"..
+  "\n"..
+  "\n"..
+  "\n",
+  "The TA5 Hyperloop Chest allows objects to be transported over a Hyperloop network.\n"..
+  "\n"..
+  "The TA5 Hyperloop Chest has to be placed on a Hyperloop Junction. The chest has a special menu\\, with which you can pair two chests. Things that are in the chest are teleported to the remote station. The chest can also be filled/emptied with a pusher.\n"..
+  "\n"..
+  "For pairing you first have to enter a name for the chest on one side\\, then you can select this name for the other chest and thus connect the two blocks.\n"..
+  "\n"..
+  "The use of the TA5 Hyperloop Chest requires 20 experience points.\n"..
+  "\n"..
+  "\n"..
+  "\n",
+  "The TA5 Hyperloop Tank allows liquids to be transported over a Hyperloop network.\n"..
+  "\n"..
+  "The TA5 Hyperloop Tank has to be placed on a Hyperloop Junction.The tank has a special menu\\, with which you can pair two tanks. Liquids in the tank will be teleported to the remote station. The tank can also be filled/emptied with a pump.\n"..
+  "\n"..
+  "For pairing you first have to enter a name for the tank on one side\\, then you can select this name for the other tank and thus connect the two blocks.\n"..
+  "\n"..
+  "The use of the TA5 Hyperloop Tank requires 20 experience points.\n"..
+  "\n"..
+  "\n"..
+  "\n",
+  "Teleport blocks allow things to be transferred between two teleport blocks without the need for a pipe or tube in between. To pair the blocks\\, you first have to enter a name for the block on one side\\, then you can select this name for the other block and thus connect the two blocks. Pairing can only be carried out by one player (player name is checked) and must be completed before the server is restarted. Otherwise the pairing data will be lost.\n"..
+  "\n"..
+  "The map on the right shows how the blocks can be used. \n"..
+  "\n"..
+  "\n"..
+  "\n",
+  "These teleport blocks allow the transfer of items and thus replace a tube. Distances of up to 200 blocks can be bridged.\n"..
+  "\n"..
+  "Each Teleport blocks requires 12 ku of electricity.\n"..
+  "\n"..
+  "60 experience points are required to use the teleport blocks. \n"..
+  "\n"..
+  "\n"..
+  "\n",
+  "These teleport blocks allow the transfer of liquids and thus replace a pipe. Distances of up to 200 blocks can be bridged.\n"..
+  "\n"..
+  "Each Teleport blocks requires 12 ku of electricity.\n"..
+  "\n"..
+  "60 experience points are required to use the teleport blocks. \n"..
+  "\n"..
+  "\n"..
+  "\n",
+  "The Hyperloop Teleport Blocks allow the construction of a Hyperloop network without Hyperloop tubes.\n"..
+  "\n"..
+  "The use of the Hyperloop Teleport Blocks requires 120 experience points.\n"..
+  "\n",
+  "",
+  "The TA5 container allows Techage systems to be packed and unpacked at another location.\n"..
+  "\n"..
+  "80 experience points are required to use the TA5 container.\n"..
+  "\n",
+  "The TA5 AI Chip is partly required for the production of TA5 blocks. The TA5 AI Chip can only be manufactured at the TA4 Electronics Fab. This requires 10 experience points.\n"..
+  "\n"..
+  "\n"..
   "\n",
 }
 
@@ -1865,12 +2241,14 @@ techage.manual_EN.aItemName = {
   "ta3_doorblock",
   "ta3_doorcontroller",
   "ta3_doorcontroller",
+  "ta3_soundblock",
   "ta3_mesecons_converter",
   "ta3_nodedetector",
   "ta3_detector",
   "ta3_cartdetector",
   "ta3_nodedetector",
   "ta3_playerdetector",
+  "ta3_lightdetector",
   "ta3_grinder",
   "ta3_pusher",
   "ta3_distributor",
@@ -1886,6 +2264,7 @@ techage.manual_EN.aItemName = {
   "ta3_programmer",
   "ta3_trowel",
   "ta3_drill_pipe_wrench",
+  "ta3_screwdriver",
   "techage_ta4",
   "",
   "ta4_windturbine",
@@ -1931,9 +2310,17 @@ techage.manual_EN.aItemName = {
   "ta4_terminal",
   "",
   "ta4_button",
+  "ta4_button_2x",
+  "ta4_button_4x",
+  "ta4_signallamp_2x",
+  "ta4_signallamp_4x",
   "ta4_playerdetector",
   "ta4_collector",
   "ta4_detector",
+  "ta4_sequencer",
+  "",
+  "ta4_movecontroller",
+  "ta4_turncontroller",
   "",
   "ta4_growlight",
   "ta4_streetlamp",
@@ -1943,6 +2330,12 @@ techage.manual_EN.aItemName = {
   "",
   "",
   "",
+  "",
+  "ta4_terminal",
+  "techage_ta4c",
+  "",
+  "ta4_recipeblock",
+  "ta4_autocrafter",
   "ta4_tank",
   "ta4_pump",
   "ta4_furnaceheater",
@@ -1960,6 +2353,29 @@ techage.manual_EN.aItemName = {
   "ta4_electronicfab",
   "ta4_injector",
   "ta4_recycler",
+  "techage_ta5",
+  "",
+  "",
+  "ta5_magnet",
+  "ta5_pump",
+  "",
+  "ta5_fr_controller",
+  "ta5_fr_shell",
+  "ta5_fr_nucleus",
+  "",
+  "",
+  "",
+  "",
+  "ta5_flycontroller",
+  "ta5_chest",
+  "ta5_tank",
+  "",
+  "ta5_tele_tube",
+  "ta5_tele_pipe",
+  "",
+  "",
+  "",
+  "ta5_aichip",
 }
 
 techage.manual_EN.aPlanTable = {
@@ -2101,6 +2517,9 @@ techage.manual_EN.aPlanTable = {
   "",
   "",
   "",
+  "",
+  "",
+  "",
   "ta4_windturbine",
   "",
   "",
@@ -2153,9 +2572,19 @@ techage.manual_EN.aPlanTable = {
   "",
   "",
   "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
   "ta4_liquid_filter_base",
   "ta4_liquid_filter_gravel",
   "ta4_liquid_filter_top",
+  "techage_collider_plan",
+  "ta4_cooler",
   "",
   "",
   "",
@@ -2168,6 +2597,33 @@ techage.manual_EN.aPlanTable = {
   "",
   "",
   "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "ta5_fusion_reactor",
+  "",
+  "",
+  "ta5_heatexchanger",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "",
+  "ta5_teleport",
   "",
   "",
   "",

@@ -9,7 +9,7 @@
 	See LICENSE.txt for more information
 
 	Logic library
-	
+
 ]]--
 
 -- for lazy programmers
@@ -27,7 +27,7 @@ local Face2Dir = {[0]=
 	{x=0,  y=1,  z=0}
 }
 
--- Determine the destination position based on the position, 
+-- Determine the destination position based on the position,
 -- the node param2, and a route table like : {0,0,3}
 -- 0 = forward, 1 = right, 2 = backward, 3 = left
 function techage.logic.dest_pos(pos, param2, route)
@@ -65,6 +65,15 @@ function techage.logic.send_on(pos, meta, time)
 	end
 	techage.send_multi(own_num, numbers, "on")
 	return own_num == numbers
+end
+
+function techage.logic.send_cmnd(pos, meta, cmnd, payload, time)
+	local own_num = meta:get_string("node_number") or ""
+	local numbers = meta:get_string("numbers") or ""
+	if time and time > 0 then
+		minetest.get_node_timer(pos):start(time)
+	end
+	techage.send_multi(own_num, numbers, cmnd, payload)
 end
 
 function techage.logic.send_off(pos, meta)

@@ -7,7 +7,7 @@
 
 	AGPL v3
 	See LICENSE.txt for more information
-	
+
 	TA3/TA4 Tank, Oil Tank
 
 ]]--
@@ -35,7 +35,7 @@ local function node_timer(pos, elapsed)
 		local nvm = techage.get_nvm(pos)
 		M(pos):set_string("formspec", techage.liquid.formspec(pos, nvm))
 		return true
-	end	
+	end
 	return false
 end
 
@@ -53,13 +53,16 @@ end
 
 local function take_liquid(pos, indir, name, amount)
 	local nvm = techage.get_nvm(pos)
+	if (M(pos):get_int("keep_assignment") or 0) == 1 then
+		amount = math.max(math.min(amount, ((nvm.liquid or {}).amount or 0) - 1), 0)
+	end
 	amount, name = liquid.srv_take(nvm, name, amount)
 	if techage.is_activeformspec(pos) then
 		M(pos):set_string("formspec", techage.liquid.formspec(pos, nvm))
 	end
 	return amount, name
 end
-	
+
 local function put_liquid(pos, indir, name, amount)
 	-- check if it is not powder
 	local ndef = minetest.registered_craftitems[name] or {}
@@ -88,7 +91,7 @@ minetest.register_node("techage:ta3_tank", {
 	tiles = {
 		-- up, down, right, left, back, front
 		"techage_filling_ta3.png^techage_frame_ta3_top.png",
-		"techage_filling_ta3.png^techage_frame_ta3.png",
+		"techage_filling_ta3.png^techage_frame_ta3_bottom.png",
 		"techage_filling_ta3.png^techage_frame_ta3.png^techage_appl_tank.png",
 		"techage_filling_ta3.png^techage_frame_ta3.png^techage_appl_tank.png",
 		"techage_filling_ta3.png^techage_frame_ta3.png^techage_appl_tank.png",
@@ -194,7 +197,7 @@ minetest.register_node("techage:ta4_tank", {
 	tiles = {
 		-- up, down, right, left, back, front
 		"techage_filling_ta4.png^techage_frame_ta4_top.png",
-		"techage_filling_ta4.png^techage_frame_ta4.png",
+		"techage_filling_ta4.png^techage_frame_ta4_bottom.png",
 		"techage_filling_ta4.png^techage_frame_ta4.png^techage_appl_tank.png",
 		"techage_filling_ta4.png^techage_frame_ta4.png^techage_appl_tank.png",
 		"techage_filling_ta4.png^techage_frame_ta4.png^techage_appl_tank.png",
@@ -218,6 +221,9 @@ minetest.register_node("techage:ta4_tank", {
 		end
 		if fields.public then
 			M(pos):set_int("public", fields.public == "true" and 1 or 0)
+		end
+		if fields.keep_assignment then
+			M(pos):set_int("keep_assignment", fields.keep_assignment == "true" and 1 or 0)
 		end
 	end,
 	on_timer = node_timer,
@@ -245,7 +251,7 @@ liquid.register_nodes({"techage:ta4_tank"},
 	}
 )
 
-techage.register_node({"techage:ta3_tank", "techage:ta4_tank", "techage:oiltank"}, techage.liquid.recv_message)	
+techage.register_node({"techage:ta3_tank", "techage:ta4_tank", "techage:oiltank"}, techage.liquid.recv_message)
 
 minetest.register_craft({
 	output = "techage:ta3_tank 2",

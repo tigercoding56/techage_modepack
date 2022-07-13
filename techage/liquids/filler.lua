@@ -7,7 +7,7 @@
 
 	AGPL v3
 	See LICENSE.txt for more information
-	
+
 	TA3 Liquid Filler
 
 ]]--
@@ -74,13 +74,13 @@ local function node_timer(pos, elapsed)
 	if not inv:is_empty("src") then
 		local taken = techage.get_items(pos, inv, "src", 1)
 		if liquid.is_container_empty(taken:get_name()) then
-			return liquid.fill_container({x = pos.x, y = pos.y+1, z = pos.z}, inv, taken:get_name())
+			liquid.fill_container({x = pos.x, y = pos.y+1, z = pos.z}, inv, taken:get_name())
 		else
-			return liquid.empty_container({x = pos.x, y = pos.y-1, z = pos.z}, inv, taken:get_name())
+			liquid.empty_container({x = pos.x, y = pos.y-1, z = pos.z}, inv, taken:get_name())
 		end
 	end
-	return false
-end	
+	return true
+end
 
 minetest.register_node("techage:filler", {
 	description = S("TA Liquid Filler"),
@@ -110,21 +110,21 @@ minetest.register_node("techage:filler", {
 		inv:set_size('src', 9)
 		inv:set_size('dst', 9)
 	end,
-	
+
 	after_place_node = function(pos, placer)
 		M(pos):set_string("formspec", formspec(pos))
 	end,
-	
+
 	on_rightclick = on_rightclick,
 	on_timer = node_timer,
 	can_dig = can_dig,
 	allow_metadata_inventory_put = allow_metadata_inventory_put,
 	allow_metadata_inventory_take = allow_metadata_inventory_take,
-	
+
 	on_rotate = screwdriver.disallow, -- important!
 	paramtype = "light",
 	sunlight_propagates = true,
-        use_texture_alpha = techage.CLIP,
+	use_texture_alpha = techage.CLIP,
 	is_ground_content = false,
 	groups = {cracky=2, crumbly=2, choppy=2},
 	sounds = default.node_sound_defaults(),
@@ -144,7 +144,7 @@ techage.register_node({"techage:filler"}, {
 		local inv = M(pos):get_inventory()
 		return techage.put_items(inv, "dst", stack)
 	end,
-})	
+})
 
 
 minetest.register_craft({

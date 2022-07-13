@@ -3,7 +3,7 @@
 	TechAge
 	=======
 
-	Copyright (C) 2019-2021 Joachim Stolberg
+	Copyright (C) 2019-2022 Joachim Stolberg
 
 	AGPL v3
 	See LICENSE.txt for more information
@@ -13,7 +13,7 @@
 techage = {}
 
 -- Version for compatibility checks, see readme.md/history
-techage.version = 1.01
+techage.version = 1.08
 
 if minetest.global_exists("tubelib") then
 	minetest.log("error", "[techage] Techage can't be used together with the mod tubelib!")
@@ -24,20 +24,23 @@ elseif minetest.global_exists("ironage") then
 elseif minetest.global_exists("techpack") then
 	minetest.log("error", "[techage] Techage can't be used together with the modpack techpack!")
 	return
-elseif minetest.global_exists("tubelib2") and tubelib2.version < 1.9 then
-	minetest.log("error", "[techage] Techage requires tubelib2 version 1.9 or newer!")
+elseif minetest.global_exists("tubelib2") and tubelib2.version < 2.2 then
+	minetest.log("error", "[techage] Techage requires tubelib2 version 2.2 or newer!")
 	return
 elseif minetest.global_exists("minecart") and minecart.version < 1.08 then
 	minetest.log("error", "[techage] Techage requires minecart version 1.08 or newer!")
 	return
-elseif minetest.global_exists("lcdlib") and lcdlib.version < 1.0 then
-	minetest.log("error", "[techage] Techage requires lcdlib version 1.0 or newer!")
+elseif minetest.global_exists("lcdlib") and lcdlib.version < 1.01 then
+	minetest.log("error", "[techage] Techage requires lcdlib version 1.01 or newer!")
 	return
-elseif minetest.global_exists("safer_lua") and safer_lua.version < 1.0 then
-	minetest.log("error", "[techage] Techage requires safer_lua version 1.0 or newer!")
+elseif minetest.global_exists("safer_lua") and safer_lua.version < 1.01 then
+	minetest.log("error", "[techage] Techage requires safer_lua version 1.01 or newer!")
 	return
-elseif minetest.global_exists("networks") and networks.version < 0.08 then
-	minetest.log("error", "[techage] Techage requires networks version 0.08 or newer!")
+elseif minetest.global_exists("networks") and networks.version < 0.10 then
+	minetest.log("error", "[techage] Techage requires networks version 0.10 or newer!")
+	return
+elseif minetest.global_exists("hyperloop") and hyperloop.version < 2.07 then
+	minetest.log("error", "[techage] Techage requires hyperloop version 2.07 or newer!")
 	return
 end
 
@@ -52,6 +55,7 @@ techage.max_num_forceload_blocks = tonumber(minetest.settings:get("techage_max_n
 techage.basalt_stone_enabled = minetest.settings:get_bool("techage_basalt_stone_enabled") ~= false
 techage.ore_rarity = tonumber(minetest.settings:get("techage_ore_rarity")) or 1
 techage.modified_recipes_enabled = minetest.settings:get_bool("techage_modified_recipes_enabled") ~= false
+techage.collider_min_depth = tonumber(minetest.settings:get("techage_collider_min_depth")) or -28
 
 -- allow to load marshal and sqlite3
 techage.IE = minetest.request_insecure_environment()
@@ -73,6 +77,7 @@ end
 -- Basis features
 local MP = minetest.get_modpath("techage")
 dofile(MP.."/basis/lib.lua")  -- helper functions
+dofile(MP.."/basis/counting.lua")  -- command counting
 dofile(MP.."/basis/fake_player.lua")  -- dummy player object
 dofile(MP.."/basis/node_store.lua")
 dofile(MP.."/basis/gravel_lib.lua")  -- ore probability
@@ -93,6 +98,12 @@ dofile(MP.."/basis/formspec_update.lua")
 dofile(MP.."/basis/windturbine_lib.lua")
 dofile(MP.."/basis/laser_lib.lua")
 dofile(MP.."/basis/legacy.lua")
+dofile(MP.."/basis/hyperloop.lua")
+dofile(MP.."/basis/oggfiles.lua")
+dofile(MP.."/basis/submenu.lua")
+dofile(MP.."/basis/shared_inv.lua")
+dofile(MP.."/basis/shared_tank.lua")
+dofile(MP.."/basis/teleport.lua")
 
 -- Main doc
 dofile(MP.."/doc/manual_DE.lua")
@@ -161,6 +172,8 @@ dofile(MP.."/ta2_energy_storage/ta2_weight_chest.lua")
 dofile(MP.."/liquids/liquid_pipe.lua")
 dofile(MP.."/liquids/valve.lua")
 dofile(MP.."/liquids/pipe_wall_entry.lua")
+dofile(MP.."/fusion_reactor/gas_pipe.lua")
+
 
 -- Basic Machines
 dofile(MP.."/basic_machines/consumer.lua")  -- consumer base model
@@ -182,6 +195,8 @@ dofile(MP.."/basic_machines/ta4_injector.lua")
 dofile(MP.."/basic_machines/itemsource.lua")
 dofile(MP.."/basic_machines/recycler.lua")
 dofile(MP.."/basic_machines/concentrator.lua")
+dofile(MP.."/basic_machines/recipeblock.lua")
+dofile(MP.."/basic_machines/ta5_chest.lua")
 
 -- Liquids II
 dofile(MP.."/liquids/tank.lua")
@@ -190,6 +205,7 @@ dofile(MP.."/liquids/silo.lua")
 dofile(MP.."/liquids/pump.lua")
 dofile(MP.."/liquids/waterpump.lua")
 dofile(MP.."/liquids/waterinlet.lua")
+dofile(MP.."/liquids/ta5_tank.lua")
 
 -- Coal power station
 dofile(MP.."/coal_power_station/firebox.lua")
@@ -214,10 +230,11 @@ dofile(MP.."/tools/repairkit.lua")
 dofile(MP.."/tools/pipe_wrench.lua")
 dofile(MP.."/basic_machines/blackhole.lua")
 dofile(MP.."/basic_machines/forceload.lua")
+dofile(MP.."/tools/screwdriver.lua")
 
 -- Lamps
 dofile(MP.."/lamps/lib.lua")
-dofile(MP.."/lamps/lightblock.lua")	
+dofile(MP.."/lamps/lightblock.lua")
 dofile(MP.."/lamps/simplelamp.lua")
 dofile(MP.."/lamps/streetlamp.lua")
 dofile(MP.."/lamps/streetlamp2.lua")
@@ -263,20 +280,34 @@ dofile(MP.."/logic/repeater.lua")
 dofile(MP.."/logic/programmer.lua")
 dofile(MP.."/logic/signallamp.lua")
 dofile(MP.."/logic/sequencer.lua")
+dofile(MP.."/logic/sequencer2.lua")
 dofile(MP.."/logic/timer.lua")
 dofile(MP.."/logic/lua_logic.lua")  -- old
 dofile(MP.."/logic/logic_block.lua")  -- new
 dofile(MP.."/logic/node_detector.lua")
+dofile(MP.."/logic/light_detector.lua")
 dofile(MP.."/logic/player_detector.lua")
+dofile(MP.."/logic/mba_detector.lua")
 dofile(MP.."/logic/cart_detector.lua")
-dofile(MP.."/logic/gateblock.lua")
-dofile(MP.."/logic/doorblock.lua")
-dofile(MP.."/logic/doorcontroller.lua")  -- old
-dofile(MP.."/logic/doorcontroller2.lua")  -- new
 dofile(MP.."/logic/collector.lua")
+dofile(MP.."/logic/button_2x.lua")
+dofile(MP.."/logic/button_4x.lua")
+dofile(MP.."/logic/signallamp_2x.lua")
+dofile(MP.."/logic/signallamp_4x.lua")
 if minetest.global_exists("mesecon") then
 	dofile(MP.."/logic/mesecons_converter.lua")
 end
+
+-- move_controller
+dofile(MP.."/move_controller/gateblock.lua")
+dofile(MP.."/move_controller/doorblock.lua")
+dofile(MP.."/move_controller/doorcontroller.lua")  -- old
+dofile(MP.."/move_controller/doorcontroller2.lua")  -- new
+dofile(MP.."/move_controller/movecontroller.lua")
+dofile(MP.."/move_controller/turncontroller.lua")
+dofile(MP.."/move_controller/flycontroller.lua")
+dofile(MP.."/move_controller/soundblock.lua")
+
 
 -- Test
 dofile(MP.."/recipe_checker.lua")
@@ -342,9 +373,9 @@ dofile(MP.."/items/petroleum.lua")
 dofile(MP.."/items/bauxit.lua")
 dofile(MP.."/items/silicon.lua")
 dofile(MP.."/items/steelmat.lua")
+dofile(MP.."/items/aluminium.lua")
 dofile(MP.."/items/powder.lua")
 dofile(MP.."/items/epoxy.lua")
-dofile(MP.."/items/aluminium.lua")
 dofile(MP.."/items/plastic.lua")
 dofile(MP.."/items/hydrogen.lua")
 dofile(MP.."/items/electronic.lua")
@@ -359,9 +390,31 @@ dofile(MP.."/items/moreblocks.lua")
 dofile(MP.."/carts/tank_cart.lua")
 dofile(MP.."/carts/chest_cart.lua")
 
+-- TA4 Collider
+dofile(MP.."/collider/vacuumtube.lua")
+dofile(MP.."/collider/magnet.lua")
+dofile(MP.."/collider/inlets.lua")
+dofile(MP.."/collider/cooler.lua")
+dofile(MP.."/collider/detector.lua")
+dofile(MP.."/collider/worker.lua")
+
+-- TA5 Teleport
+dofile(MP.."/teleport/teleport_tube.lua")
+dofile(MP.."/teleport/teleport_pipe.lua")
+
+-- TA5 Fusion Reactor
+dofile(MP.."/fusion_reactor/shell.lua")
+dofile(MP.."/fusion_reactor/magnet.lua")
+dofile(MP.."/fusion_reactor/controller.lua")
+dofile(MP.."/fusion_reactor/heatexchanger3.lua")
+dofile(MP.."/fusion_reactor/heatexchanger2.lua")
+dofile(MP.."/fusion_reactor/heatexchanger1.lua")
+dofile(MP.."/fusion_reactor/generator.lua")
+dofile(MP.."/fusion_reactor/turbine.lua")
+dofile(MP.."/fusion_reactor/ta5_pump.lua")
+
+-- Beduino extensions
+dofile(MP.."/beduino/kv_store.lua")
 
 -- Prevent other mods from using IE
 techage.IE = nil
-
-
-function techage.icta_register_condition(key, tData) end

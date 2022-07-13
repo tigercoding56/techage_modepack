@@ -3,13 +3,13 @@
 	TechAge
 	=======
 
-	Copyright (C) 2019-2021 Joachim Stolberg
+	Copyright (C) 2019-2022 Joachim Stolberg
 
 	AGPL v3
 	See LICENSE.txt for more information
-	
+
 	TA2/TA3/TA4 Grinder, grinding Cobble/Basalt to Gravel
-	
+
 ]]--
 
 -- for lazy programmers
@@ -56,7 +56,10 @@ local function allow_metadata_inventory_put(pos, listname, index, stack, player)
 		return 0
 	end
 	if listname == "src" then
-		CRD(pos).State:start_if_standby(pos)
+		local state = CRD(pos).State
+		if state then
+			state:start_if_standby(pos)
+		end
 	end
 	return stack:get_count()
 end
@@ -98,7 +101,7 @@ local function src_to_dst(src_stack, idx, src_name, num_items, inp_num, inv, dst
 	end
 	return false
 end
-			
+
 local function grinding(pos, crd, nvm, inv)
 	local blocked = false 	-- idle
 	for idx,stack in ipairs(inv:get_list("src")) do
@@ -206,12 +209,18 @@ local tubing = {
 	on_recv_message = function(pos, src, topic, payload)
 		return CRD(pos).State:on_receive_message(pos, topic, payload)
 	end,
+	on_beduino_receive_cmnd = function(pos, src, topic, payload)
+		return CRD(pos).State:on_beduino_receive_cmnd(pos, topic, payload)
+	end,
+	on_beduino_request_data = function(pos, src, topic, payload)
+		return CRD(pos).State:on_beduino_request_data(pos, topic, payload)
+	end,
 	on_node_load = function(pos)
 		CRD(pos).State:on_node_load(pos)
 	end,
 }
 
-local node_name_ta2, node_name_ta3, node_name_ta4 = 
+local node_name_ta2, node_name_ta3, node_name_ta4 =
 	techage.register_consumer("grinder", S("Grinder"), tiles, {
 		drawtype = "nodebox",
 		paramtype = "light",
@@ -313,7 +322,7 @@ techage.register_node({"techage:ta1_mill_base"}, {
 	on_node_load = function(pos, node)
 		minetest.get_node_timer(pos):start(4)
 	end,
-})	
+})
 
 minetest.register_craft({
 	output = "techage:ta1_mill_base",
@@ -351,43 +360,37 @@ minetest.register_craft({
 	},
 })
 
-if minetest.global_exists("unified_inventory") then
-	unified_inventory.register_craft_type("grinding", {
-		description = S("Grinding"),
-		icon = 'techage_appl_grinder.png',
-		width = 2,
-		height = 2,
-	})
-	unified_inventory.register_craft_type("milling", {
-		description = S("Milling"),
-		icon = 'techage_mill_inv.png',
-		width = 2,
-		height = 2,
-	})
-end
+techage.recipes.register_craft_type("grinding", {
+	description = S("Grinding"),
+	icon = 'techage_appl_grinder.png',
+	width = 2,
+	height = 2,
+})
+techage.recipes.register_craft_type("milling", {
+	description = S("Milling"),
+	icon = 'techage_mill_inv.png',
+	width = 2,
+	height = 2,
+})
 
 function techage.add_grinder_recipe(recipe, ta1_permitted)
 	local name, num = unpack(string.split(recipe.input, " ", false, 1))
 	if minetest.registered_items[name] then
 		if ta1_permitted then
 			RecipesTa1[name] = {input = name,inp_num = tonumber(num) or 1, output = recipe.output}
-			
-			if minetest.global_exists("unified_inventory") then
-				recipe.items = {recipe.input}
-				recipe.type = "milling"
-				unified_inventory.register_craft(table.copy(recipe))
-			end
-		end
-		
-		Recipes[name] = {input = name,inp_num = tonumber(num) or 1, output = recipe.output}
-		
-		if minetest.global_exists("unified_inventory") then
+
 			recipe.items = {recipe.input}
-			recipe.type = "grinding"
-			unified_inventory.register_craft(recipe)
+			recipe.type = "milling"
+			techage.recipes.register_craft(table.copy(recipe))
 		end
+
+		Recipes[name] = {input = name,inp_num = tonumber(num) or 1, output = recipe.output}
+
+		recipe.items = {recipe.input}
+		recipe.type = "grinding"
+		techage.recipes.register_craft(recipe)
 	end
-end	
+end
 
 
 techage.add_grinder_recipe({input="default:cobble", output="default:gravel"})

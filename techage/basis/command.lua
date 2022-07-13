@@ -7,7 +7,7 @@
 
 	AGPL v3
 	See LICENSE.txt for more information
-	
+
 	Basis functions for inter-node communication
 
 ]]--
@@ -27,6 +27,8 @@ local string_split = string.split
 local NodeDef = techage.NodeDef
 local Tube = techage.Tube
 local is_cart_available = minecart.is_nodecart_available
+local techage_counting_hit = techage.counting_hit
+local tubelib2_side_to_dir = tubelib2.side_to_dir
 
 -------------------------------------------------------------------
 -- Database
@@ -58,7 +60,7 @@ local function delete_nodeinfo_entry(number)
 	return number
 end
 
--- Keep the cache size small by deleting entries randomly 
+-- Keep the cache size small by deleting entries randomly
 local function keep_small(number)
 	number = delete_nodeinfo_entry(number)
 	minetest.after(10, keep_small, number)
@@ -81,13 +83,13 @@ end
 -- Determine position related node number for addressing purposes
 local function get_number(pos, new)
 	local meta = minetest.get_meta(pos)
-	if meta:contains("node_number") then 
-		return meta:get_string("node_number") 
+	if meta:contains("node_number") then
+		return meta:get_string("node_number")
 	end
 	-- generate new number
 	if new then
 		local num = backend.add_nodepos(pos)
-		meta:set_string("node_number", num) 
+		meta:set_string("node_number", num)
 		return num
 	end
 end
@@ -124,11 +126,7 @@ end
 local SideToDir = {B=1, R=2, F=3, L=4, D=5, U=6}
 
 local function side_to_dir(side, param2)
-	local dir = SideToDir[side]
-	if dir < 5 then
-		dir = (((dir - 1) + (param2 % 4)) % 4) + 1
-	end
-	return dir
+	return tubelib2_side_to_dir(side, param2)
 end
 
 techage.side_to_outdir = side_to_dir
@@ -140,15 +138,15 @@ end
 local function get_next_node(pos, out_dir)
 	local res, npos, node = Tube:compatible_node(pos, out_dir)
 	local in_dir = tubelib2.Turn180Deg[out_dir]
-	return res, npos, in_dir, node.name 
+	return res, npos, in_dir, node.name
 end
 
 local function get_dest_node(pos, out_dir)
 	local spos, in_dir = Tube:get_connected_node_pos(pos, out_dir)
 	local _,node = Tube:get_node(spos)
-	return spos, in_dir, node.name 
+	return spos, in_dir, node.name
 end
-	
+
 local function item_handling_node(name)
 	local node_def = name and NodeDef[name]
 	if node_def then
@@ -180,17 +178,17 @@ end)
 -------------------------------------------------------------------
 -- API helper functions
 -------------------------------------------------------------------
-	
+
 -- Function returns { pos, name } for the node referenced by number
 function techage.get_node_info(dest_num)
 	return NodeInfoCache[dest_num] or update_nodeinfo(dest_num)
-end	
+end
 
 -- Function returns the node number from the given position or
 -- nil, if no node number for this position is assigned.
 function techage.get_node_number(pos)
 	return get_number(pos)
-end	
+end
 
 function techage.get_pos(pos, side)
 	local node = techage.get_node_lvm(pos)
@@ -199,11 +197,11 @@ function techage.get_pos(pos, side)
 		dir = side_to_dir(side, node.param2)
 	end
 	return tubelib2.get_pos(pos, dir)
-end	
+end
 
 -- Function is used for available nodes with lost numbers, only.
 function techage.get_new_number(pos, name)
-	-- store position 
+	-- store position
 	return get_number(pos, true)
 end
 
@@ -216,7 +214,7 @@ end
 -------------------------------------------------------------------
 -- Node construction/destruction functions
 -------------------------------------------------------------------
-	
+
 -- Add node to the techage lists.
 -- Function determines and returns the node position number,
 -- needed for message communication.
@@ -226,7 +224,7 @@ function techage.add_node(pos, name, is_ta2)
 	if item_handling_node(name) then
 		Tube:after_place_node(pos)
 	end
-	if is_ta2 then 
+	if is_ta2 then
 		return "-"
 	end
 	local key = minetest.hash_node_position(pos)
@@ -246,6 +244,36 @@ function techage.remove_node(pos, oldnode, oldmetadata)
 	if number and tonumber(number) then
 		local key = minetest.hash_node_position(pos)
 		NumbersToBeRecycled[key] = number
+		NodeInfoCache[number] = nil
+	end
+	if oldnode and item_handling_node(oldnode.name) then
+		Tube:after_dig_node(pos)
+	end
+end
+
+-- Repairs the node number after it was erased by `backend.delete_invalid_entries`
+function techage.repair_number(pos)
+	local number = techage.get_node_number(pos)
+	if number then
+		backend.set_nodepos(number, pos)
+	end
+end
+
+-- Like techage.add_node, but use the old number again
+function techage.unpack_node(pos, name, number)
+	if item_handling_node(name) then
+		Tube:after_place_node(pos)
+	end
+	local key = minetest.hash_node_position(pos)
+	NumbersToBeRecycled[key] = nil
+	if number then
+		backend.set_nodepos(number, pos)
+	end
+end
+
+-- Like techage.remove_node but don't store the number for this position
+function techage.pack_node(pos, oldnode, number)
+	if number then
 		NodeInfoCache[number] = nil
 	end
 	if oldnode and item_handling_node(oldnode.name) then
@@ -276,10 +304,10 @@ function techage.register_node(names, node_definition)
 	for _,n in ipairs(names) do
 		NodeDef[n] = node_definition
 	end
-	if node_definition.on_pull_item or node_definition.on_push_item or 
+	if node_definition.on_pull_item or node_definition.on_push_item or
 			node_definition.is_pusher then
 		Tube:add_secondary_node_names(names)
-		
+
 		for _,n in ipairs(names) do
 			techage.KnownNodes[n] = true
 		end
@@ -315,7 +343,7 @@ function techage.check_numbers(numbers, placer_name)
 		return true
 	end
 	return false
-end	
+end
 
 function techage.send_multi(src, numbers, topic, payload)
 	--print("send_multi", src, numbers, topic)
@@ -324,11 +352,12 @@ function techage.send_multi(src, numbers, topic, payload)
 		if ninfo and ninfo.name and ninfo.pos then
 			local ndef = NodeDef[ninfo.name]
 			if ndef and ndef.on_recv_message then
+				techage_counting_hit()
 				ndef.on_recv_message(ninfo.pos, src, topic, payload)
 			end
 		end
 	end
-end		
+end
 
 function techage.send_single(src, number, topic, payload)
 	--print("send_single", src, number, topic)
@@ -336,11 +365,12 @@ function techage.send_single(src, number, topic, payload)
 	if ninfo and ninfo.name and ninfo.pos then
 		local ndef = NodeDef[ninfo.name]
 		if ndef and ndef.on_recv_message then
+			techage_counting_hit()
 			return ndef.on_recv_message(ninfo.pos, src, topic, payload)
 		end
 	end
 	return false
-end		
+end
 
 -- The destination node location is either:
 -- A) a destination position, specified by pos
@@ -374,7 +404,34 @@ function techage.transfer(pos, outdir, topic, payload, network, nodenames)
 		return ndef.on_transfer(dpos, indir, topic, payload)
 	end
 	return false
-end		
+end
+
+-------------------------------------------------------------------
+-- Beduino functions (see "bep-005_ta_cmnd.md")
+-------------------------------------------------------------------
+function techage.beduino_send_cmnd(src, number, topic, payload)
+	--print("beduino_send_cmnd", src, number, topic)
+	local ninfo = NodeInfoCache[number] or update_nodeinfo(number)
+	if ninfo and ninfo.name and ninfo.pos then
+		local ndef = NodeDef[ninfo.name]
+		if ndef and ndef.on_beduino_receive_cmnd then
+			return ndef.on_beduino_receive_cmnd(ninfo.pos, src, topic, payload or {})
+		end
+	end
+	return 1, ""
+end
+
+function techage.beduino_request_data(src, number, topic, payload)
+	--print("beduino_request_data", src, number, topic)
+	local ninfo = NodeInfoCache[number] or update_nodeinfo(number)
+	if ninfo and ninfo.name and ninfo.pos then
+		local ndef = NodeDef[ninfo.name]
+		if ndef and ndef.on_beduino_request_data then
+			return ndef.on_beduino_request_data(ninfo.pos, src, topic, payload or {})
+		end
+	end
+	return 1, ""
+end
 
 -------------------------------------------------------------------
 -- Client side Push/Pull item functions
@@ -397,10 +454,35 @@ end
 function techage.push_items(pos, out_dir, stack, idx)
 	local npos, in_dir, name = get_dest_node(pos, out_dir)
 	if npos and NodeDef[name] and NodeDef[name].on_push_item then
-		return NodeDef[name].on_push_item(npos, in_dir, stack, idx)	
+		return NodeDef[name].on_push_item(npos, in_dir, stack, idx)
 	elseif is_air_like(name) or is_cart_available(npos) then
 		minetest.add_item(npos, stack)
-		return true 
+		return true
+	end
+	return false
+end
+
+-- Check for recursion and too long distances
+local start_pos
+function techage.safe_push_items(pos, out_dir, stack, idx)
+	local mem = techage.get_mem(pos)
+	if not mem.pushing then
+		if not start_pos then
+			start_pos = pos
+			mem.pushing = true
+			local res = techage.push_items(pos, out_dir, stack, idx)
+			mem.pushing = nil
+			start_pos = nil
+			return res
+		else
+			local npos, in_dir, name = get_dest_node(pos, out_dir)
+			if vector.distance(start_pos, npos) < (Tube.max_tube_length or 100) then
+				mem.pushing = true
+				local res = techage.push_items(pos, out_dir, stack, idx)
+				mem.pushing = nil
+				return res
+			end
+		end
 	end
 	return false
 end
@@ -412,9 +494,9 @@ function techage.unpull_items(pos, out_dir, stack)
 	end
 	return false
 end
-	
+
 -------------------------------------------------------------------
--- Client side Push/Pull item functions for hopper like nodes 
+-- Client side Push/Pull item functions for hopper like nodes
 -- (nodes with no tube support)
 -------------------------------------------------------------------
 
@@ -428,10 +510,10 @@ end
 function techage.neighbour_push_items(pos, out_dir, stack)
 	local res, npos, in_dir, name = get_next_node(pos, out_dir)
 	if res and NodeDef[name] and NodeDef[name].on_push_item then
-		return NodeDef[name].on_push_item(npos, in_dir, stack)	
+		return NodeDef[name].on_push_item(npos, in_dir, stack)
 	elseif name == "air" then
 		minetest.add_item(npos, stack)
-		return true 
+		return true
 	end
 	return false
 end
@@ -508,3 +590,79 @@ function techage.get_inv_state(inv, listname)
     end
     return state
 end
+
+-- Beduino variant
+function techage.get_inv_state_num(inv, listname)
+	local state
+    if inv:is_empty(listname) then
+        state = 0
+    else
+        local list = inv:get_list(listname)
+        state = 2
+        for _, item in ipairs(list) do
+            if item:is_empty() then
+                return 1
+            end
+        end
+    end
+    return state
+end
+
+minetest.register_chatcommand("ta_send", {
+	description = minetest.formspec_escape(
+			"Send a techage command to the block with the number given: /ta_send <number> <command> [<data>]"),
+    func = function(name, param)
+		local num, cmnd, payload = param:match('^([0-9]+)%s+(%w+)%s*(.*)$')
+
+		if num and cmnd then
+			if techage.not_protected(num, name) then
+				local resp = techage.send_single("0", num, cmnd, payload)
+				if type(resp) == "string" then
+					return true, resp
+				else
+					return true, dump(resp)
+				end
+			else
+				return false, "Destination block is protected"
+			end
+		end
+		return false, "Syntax: /ta_send <number> <command> [<data>]"
+    end
+})
+
+minetest.register_chatcommand("expoints", {
+    privs = {
+       server = true
+    },
+    func = function(name, param)
+		local player_name, points = param:match("^(%S+)%s*(%d*)$")
+		if player_name then
+			local player = minetest.get_player_by_name(player_name)
+			if player then
+				if points and points ~= "" then
+					if techage.set_expoints(player, tonumber(points)) then
+						return true, "The player "..player_name.." now has "..points.." experience points."
+					end
+				else
+					points = techage.get_expoints(player)
+					return true, "The player "..player_name.." has "..points.." experience points."
+				end
+			else
+				return false, "Unknown player "..player_name
+			end
+		end
+		return false, "Syntax error!  Syntax:  /expoints <name> [<points>]"
+    end
+})
+
+minetest.register_chatcommand("my_expoints", {
+    func = function(name, param)
+		local player = minetest.get_player_by_name(name)
+		if player then
+			local points = techage.get_expoints(player)
+			if points then
+				return true, "You have "..points.." experience points."
+			end
+		end
+    end
+})

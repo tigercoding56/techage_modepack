@@ -3,13 +3,13 @@
 	TechAge
 	=======
 
-	Copyright (C) 2019-2020 Joachim Stolberg
+	Copyright (C) 2019-2022 Joachim Stolberg
 
 	AGPL v3
 	See LICENSE.txt for more information
-	
+
 	TA2/TA3 Bucket based Liquid Sampler
-	
+
 ]]--
 
 -- for lazy programmers
@@ -96,7 +96,7 @@ end
 local function keep_running(pos, elapsed)
 	--if tubelib.data_not_corrupted(pos) then
 	local nvm = techage.get_nvm(pos)
-	local crd = CRD(pos)	
+	local crd = CRD(pos)
 	local inv = M(pos):get_inventory()
 	sample_liquid(pos, crd, nvm, inv)
 end
@@ -173,9 +173,15 @@ local tubing = {
 	on_recv_message = function(pos, src, topic, payload)
 		return CRD(pos).State:on_receive_message(pos, topic, payload)
 	end,
+	on_beduino_receive_cmnd = function(pos, src, topic, payload)
+		return CRD(pos).State:on_beduino_receive_cmnd(pos, topic, payload)
+	end,
+	on_beduino_request_data = function(pos, src, topic, payload)
+		return CRD(pos).State:on_beduino_request_data(pos, topic, payload)
+	end,
 }
 
-local node_name_ta2, node_name_ta3, _ = 
+local node_name_ta2, node_name_ta3, _ =
 	techage.register_consumer("liquidsampler", S("Liquid Sampler"), tiles, {
 		cycle_time = CYCLE_TIME,
 		standby_ticks = STANDBY_TICKS,
@@ -220,4 +226,3 @@ minetest.register_craft({
 		{"", "techage:vacuum_tube", ""},
 	},
 })
-

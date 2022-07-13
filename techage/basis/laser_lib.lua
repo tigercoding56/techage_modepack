@@ -42,7 +42,7 @@ local function get_positions(pos, mem, dir)
 	return true  -- no new values
 end
 
--- return both both laser entities the pos and length
+-- return for both laser entities the pos and length
 local function get_laser_length_and_pos(pos1, pos2, dir)
 	local dist = vector.distance(pos1, pos2)
 
@@ -102,7 +102,7 @@ for _, size in ipairs(SIZES) do
 			physical = false,
 			collide_with_objects = false,
 			pointable = false,
-			static_save = true,
+			static_save = false,
 			visual_size = {x = size, y = 0.05, z = 0.05},
 			glow = 14,
 			shaded = true,
@@ -131,6 +131,15 @@ function techage.renew_laser(pos, force)
 		end
 	end
 	return res
+end
+
+function techage.add_laser(pos, pos1, pos2)
+	local dir = vector.direction(pos1, pos2)
+	local param2 = minetest.dir_to_facedir(dir)
+	local size, pos3, pos4 = get_laser_length_and_pos(pos1, pos2, dir)
+	if size then
+		add_laser(pos, pos3, pos4, size, param2)
+	end
 end
 
 -- techage.del_laser(pos)

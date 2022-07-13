@@ -17,7 +17,10 @@ local S = techage.S
 local Cable1 = techage.ElectricCable
 local Cable2 = techage.TA4_Cable
 local Pipe2 = techage.LiquidPipe
-local menu = dofile(minetest.get_modpath("techage") .. "/tools/submenu.lua")   
+local menu = techage.menu
+
+local N = techage.get_node_lvm
+local CTL = function(pos) return (minetest.registered_nodes[N(pos).name] or {}).control end
 
 local function network_check(start_pos, Cable, player_name)
 --	local ndef = techage.networks.net_def(start_pos, Cable.tube_type)
@@ -34,7 +37,7 @@ local function network_check(start_pos, Cable, player_name)
 --			techage.mark_position(player_name, pos, state, "#ff0000", 6)
 --		end
 --	end)
-end	
+end
 
 local function read_state(itemstack, user, pointed_thing)
 	local pos = pointed_thing.under
@@ -43,46 +46,40 @@ local function read_state(itemstack, user, pointed_thing)
 		local hours = math.floor(time / 6)
 		local mins = (time % 6) * 10
 		if mins < 10 then mins = "00" end
-		
+
 		local number = techage.get_node_number(pos)
 		local node = minetest.get_node(pos)
 		local ndef = minetest.registered_nodes[node.name]
-		
+
 		if node.name == "default:water_source" then
 			local player_name = user:get_player_name()
 			techage.valid_place_for_windturbine(pos, player_name, 0)
 			return itemstack
 		end
-		
+
 		minetest.chat_send_player(user:get_player_name(), S("Time")..": "..hours..":"..mins.."    ")
 		local data = minetest.get_biome_data(pos)
 		if data then
 			local name = minetest.get_biome_name(data.biome)
 			minetest.chat_send_player(user:get_player_name(), S("Biome")..": "..name..", "..S("Position temperature")..": "..math.floor(data.heat).."    ")
 		end
-		
-		if ndef and ndef.networks then
-			local player_name = user:get_player_name()
-			if ndef.networks.ele1 then
-				network_check(pos, Cable1, player_name)
-			elseif ndef.networks.ele2 then
-				network_check(pos, Cable2, player_name)
-			elseif ndef.networks.pipe2 then
-				network_check(pos, Pipe2, player_name)
-			end
-		end
-		
+
 		if number then
 			if ndef and ndef.description then
 				local info = techage.send_single("0", number, "info", nil)
 				if info and info ~= "" and info ~= "unsupported" then
-					info = dump(info)
+					info = tostring(info)
 					minetest.chat_send_player(user:get_player_name(), ndef.description.." "..number..":\n"..info.."    ")
 				end
 				local state = techage.send_single("0", number, "state", nil)
 				if state and state ~= "" and state ~= "unsupported" then
 					state = dump(state)
 					minetest.chat_send_player(user:get_player_name(), ndef.description.." "..number..": state = "..state.."    ")
+				end
+				local state = techage.send_single("0", number, "count", nil)
+				if state and state ~= "" and state ~= "unsupported" then
+					state = dump(state)
+					minetest.chat_send_player(user:get_player_name(), ndef.description.." "..number..": count = "..state.."    ")
 				end
 				local fuel = techage.send_single("0", number, "fuel", nil)
 				if fuel and fuel ~= "" and fuel ~= "unsupported" then
@@ -108,6 +105,11 @@ local function read_state(itemstack, user, pointed_thing)
 				if consumption and consumption ~= "" and consumption ~= "unsupported" then
 					consumption = dump(consumption)
 					minetest.chat_send_player(user:get_player_name(), ndef.description.." "..number..": consumption = "..consumption.." kud    ")
+				end
+				local flowrate = techage.send_single("0", number, "flowrate", nil)
+				if flowrate and flowrate ~= "" and flowrate ~= "unsupported" then
+					flowrate = dump(flowrate)
+					minetest.chat_send_player(user:get_player_name(), ndef.description.." "..number..": flowrate = "..flowrate.."    ")
 				end
 				local owner = M(pos):get_string("owner") or ""
 				if owner ~= "" then
@@ -136,21 +138,43 @@ end
 local context = {}
 
 local function settings_menu(pos, playername)
+	if minetest.is_protected(pos, playername) then
+		return
+	end
+	-- Check node settings in addition
+	local access = M(pos):get_string("access")
+	local owner = M(pos):get_string("owner")
+	if access == "private" and playername ~= owner then
+		return
+	end
+
 	local number = techage.get_node_number(pos)
 	local node = minetest.get_node(pos)
 	local ndef = minetest.registered_nodes[node.name]
-	local form_def = ndef and (ndef.ta3_formspec or ndef.ta4_formspec)
-	
+	local form_def
+
+	if ndef then
+		if ndef.ta3_formspec or ndef.ta4_formspec then
+			form_def = ndef.ta3_formspec or ndef.ta4_formspec
+		elseif ndef.ta5_formspec then
+			local player = minetest.get_player_by_name(playername)
+			if techage.get_expoints(player) >= ndef.ta5_formspec.ex_points then
+				form_def = ndef.ta5_formspec.menu
+			end
+		end
+	end
+
 	context[playername] = pos
 	if form_def then
-		minetest.show_formspec(playername, "techage:ta_formspec", menu.generate_formspec(pos, ndef, form_def))
+		minetest.show_formspec(playername, "techage:ta_formspec",
+			menu.generate_formspec(pos, ndef, form_def, playername))
 	end
 end
 
 minetest.register_on_player_receive_fields(function(player, formname, fields)
-    if formname ~= "techage:ta_formspec" then
-        return false
-    end
+	if formname ~= "techage:ta_formspec" then
+		return false
+	end
 
 	local playername = player:get_player_name()
 	local pos = context[playername]
@@ -159,14 +183,18 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 		local number = techage.get_node_number(pos)
 		local node = minetest.get_node(pos)
 		local ndef = minetest.registered_nodes[node.name]
-		local form_def = ndef and (ndef.ta3_formspec or ndef.ta4_formspec)
-		
+		local form_def = ndef and (ndef.ta3_formspec or ndef.ta4_formspec or ndef.ta5_formspec.menu)
+
 		if form_def then
-			if menu.eval_input(pos, ndef, form_def, fields) then
+			if menu.eval_input(pos, form_def, fields, playername) then
 				--context[playername] = pos
 				minetest.after(0.2, function()
-					minetest.show_formspec(playername, "techage:ta_formspec", menu.generate_formspec(pos, ndef, form_def))
+					minetest.show_formspec(playername, "techage:ta_formspec",
+						menu.generate_formspec(pos, ndef, form_def, playername))
 				end)
+				if ndef.ta_after_formspec then
+					ndef.ta_after_formspec(pos, fields, playername)
+				end
 			end
 		end
 	end
@@ -216,4 +244,3 @@ minetest.register_craft({
 		{"default:steel_ingot", "", ""},
 	},
 })
-

@@ -661,15 +661,31 @@ Der Tür Controller II kann alle Arten von Blöcken entfernen und wieder setzen.
 
 Wird ein  `on` / `off` Kommando an den Tür Controller II gesendet, entfernt bzw. setzt er die Blöcke ebenfalls.
 
-Über ein `exchange` Kommando können einzelne Böcke gesetzt, entfernt, bzw. durch andere Blöcke ersetzt werden. Die Slot-Nummer des Inventars (1 .. 16) muss als payload übergeben werden, also:
+Mit `$send_cmnd(node_number, "exchange", 2)` können einzelne Böcke gesetzt, entfernt, bzw. durch andere Blöcke aus dem Inventar ersetzt werden. 
 
-```
-$send_cmnd(node_number, "exchange", 2)
-```
+Mit `$send_cmnd(node_number, "set", 2)` kann ein Block aus dem Inventory explizit gesetzt werden, sofern der Inventory Slot nicht leer ist.
+
+Mit `$send_cmnd(node_number, "dig", 2)` kann ein Block wieder entfernt werden, sofern der Inventory Slot leer ist. 
+
+Mit `$send_cmnd(node_number, "get", 2)` wird der Name des gesetzten Blocks zurückgeliefert. 
+
+Die Slot-Nummer des Inventars (1 .. 16) muss in allen drei Fällen als payload übergeben werden.
 
 Damit lassen sich auch ausfahrbare Treppen und ähnliches simulieren.
 
 [ta3_doorcontroller|image]
+
+### TA3 Sound Block
+
+Mir dem Sound Block  können veschiedene Sounds/Laute abgespielt werden. Es sind alle Sounds der Mods Techage, Signs Bot, Hyperloop, Unified Inventory, TA4 Jetpack und Minetest Game verfügbar.
+
+Die Sounds können über das Menü und über ein Kommando ausgewählt und abgespielt werden.
+
+- Kommando `on` zum Abspielen eines Sounds
+- Kommando `sound <idx>` zur Auswahl eines Sounds über den Index
+- Kommando `gain <volume>` zum Einstellen der Lautstärke über den `<volume>`  Wert (1 bis 5). 
+
+[ta3_soundblock|image]
 
 ### TA3 Mesecons Umsetzer / TA3 Mesecons Converter
 
@@ -695,6 +711,7 @@ Detektoren scannen ihre Umgebung ab und senden ein `on`-Kommando, wenn das Gesuc
 Der Detektor ist eine spezieller Röhrenblock, der erkennt, wenn Items über die Röhre weitergegeben werden. Es muss dazu auf beiden Seiten mit der Röhre verbunden sein. Werden Items mit einem Schieber in den Detektor geschoben, gibt er diese automatisch weiter.
 Er sendet ein `on`, wenn ein Item erkannt wird, gefolgt von einem `off` eine Sekunde später.
 Danach werden weitere Kommando für 8 Sekunden blockiert.
+Die Wartezeit, sowie die Items, die ein Kommando auslösen sollen, können über das Gabelschlüssel-Menü konfiguriert werden.
 
 
 [ta3_detector|image]
@@ -722,6 +739,14 @@ Der Spieler Detektor sendet ein `on`-Kommando, wenn er einen Spieler in einem Um
 Soll die Suche auf bestimmte Spieler eingegrenzt werden, so können diese Spielernamen auch eingegeben werden.
 
 [ta3_playerdetector|image]
+
+
+### TA3 Lichtdetektor
+
+Der Lichtdetektor sendet einen `on`-Kommando, wenn der Lichtpegel des darüber liegenden Blocks einen bestimmten Pegel überschreitet, der über das Rechtsklickmenü eingestellt werden kann.
+Mit einen TA4 Lua Controller kann die genaue Lichtstärke mit $get_cmd(num, 'light_level') ermitteln werden.
+
+[ta3_lightdetector|image]
 
 
 ## TA3 Maschinen
@@ -823,16 +848,12 @@ Mit Shift+Rechtsklick kann bei einigen Blöcken ein erweitertes Menü geöffnet 
 [ta3_end_wrench|image]
 
 
-
-
 ### TechAge Programmer
 
 Mit dem Programmer können Blocknummern mit einem Rechtsklick von mehreren Blöcken eingesammelt und mit einem Linksklick in einen Block wie Taster/Schalter geschrieben werden.
 Wird in die Luft geklickt, wird der interne Speicher gelöscht.
 
 [ta3_programmer|image]
-
-
 
 ### TechAge Kelle / Trowel
 
@@ -846,3 +867,14 @@ Die Kelle dient zum Verputzen von Stromkabel. Siehe dazu "TA Stromkabel".
 Mit diesem Werkzeug lassen sich die Bohrgestängezange Blöcke wieder entfernen, wenn dort bspw. ein Tunnel durch soll.
 
 [ta3_drill_pipe_wrench|image]
+
+### Techage Schraubendreher
+
+Der Techage Schraubendreher dient als Ersatz für den normalen Schraubendreher. Es besitzt folgende Funktionen:
+
+- Linksklick: Den Block nach links drehen
+- Rechtsklick: Die sichtbare Seite des Blockes nach oben drehen
+- Shift+Linksklick: Ausrichtung des angeklickten Blockes speichern
+- Shift+Rechtsklick: Die gespeicherte Ausrichtung auf den angeklickten Block anwenden
+
+[ta3_screwdriver|image]

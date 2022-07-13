@@ -3,13 +3,13 @@
 	TechAge
 	=======
 
-	Copyright (C) 2019-2020 Joachim Stolberg
+	Copyright (C) 2019-2022 Joachim Stolberg
 
 	AGPL v3
 	See LICENSE.txt for more information
-	
+
 	TA4 Sensor Chest
-	
+
 ]]--
 
 -- for lazy programmers
@@ -25,7 +25,7 @@ local function store_action(pos, player, action)
 	local name = player and player:get_player_name() or ""
 	local number = meta:get_string("node_number")
 	PlayerActions[number] = {name, action}
-end	
+end
 
 local function send_off_command(pos)
 	local meta = minetest.get_meta(pos)
@@ -44,6 +44,13 @@ local function send_command(pos)
 		techage.send_single(own_num, number, "on")
 		minetest.after(0.2, send_off_command, pos)
 	end
+end
+
+local function get_stack(pos, idx)
+	local meta = minetest.get_meta(pos)
+	local inv = meta:get_inventory()
+	local stack = inv:get_stack("main", idx)
+	return stack:get_name(), stack:get_count()
 end
 
 local function get_stacks(pos)
@@ -134,7 +141,7 @@ minetest.register_node("techage:ta4_sensor_chest", {
 		local inv = meta:get_inventory()
 		inv:set_size('main', 4)
 	end,
-	
+
 	after_place_node = function(pos, placer)
 		local meta = minetest.get_meta(pos)
 		local number = techage.add_node(pos, "techage:ta4_sensor_chest")
@@ -148,11 +155,11 @@ minetest.register_node("techage:ta4_sensor_chest", {
 	on_receive_fields = function(pos, formname, fields, player)
 		local meta = M(pos)
 		local nvm = techage.get_nvm(pos)
-		
+
 		if meta:get_string("public") ~= "true" and minetest.is_protected(pos, player:get_player_name()) then
 			return 0
 		end
-		
+
 		if fields.public then
 			meta:set_string("public", fields.public)
 		end
@@ -174,11 +181,11 @@ minetest.register_node("techage:ta4_sensor_chest", {
 			meta:set_string("formspec", formspec2(pos))
 		end
 	end,
-	
+
 	techage_set_numbers = function(pos, numbers, player_name)
 		return techage.logic.set_numbers(pos, numbers, player_name, S("TA4 Sensor Chest"))
 	end,
-	
+
 	can_dig = can_dig,
 	after_dig_node = after_dig_node,
 	allow_metadata_inventory_put = allow_metadata_inventory_put,
@@ -206,7 +213,7 @@ techage.register_node({"techage:ta4_sensor_chest"}, {
 		local inv = meta:get_inventory()
 		return techage.put_items(inv, "main", stack)
 	end,
-	
+
 	on_recv_message = function(pos, src, topic, payload)
 		if topic == "state" then
 			local meta = minetest.get_meta(pos)
@@ -215,7 +222,7 @@ techage.register_node({"techage:ta4_sensor_chest"}, {
 		elseif topic == "action" then
 			local meta = minetest.get_meta(pos)
 			local number = meta:get_string("node_number")
-			return PlayerActions[number][1], PlayerActions[number][2]
+			return (PlayerActions[number] or {})[1], (PlayerActions[number] or {})[2]
 		elseif topic == "stacks" then
 			return get_stacks(pos)
 		elseif topic == "text" then
@@ -226,11 +233,44 @@ techage.register_node({"techage:ta4_sensor_chest"}, {
 			return "unsupported"
 		end
 	end,
-})	
+	on_beduino_receive_cmnd = function(pos, src, topic, payload)
+		if topic == 66 then
+			local meta = minetest.get_meta(pos)
+			meta:set_string("text", tostring(payload))
+			meta:set_string("formspec", formspec2(pos))
+			return 0
+		else
+			return 2
+		end
+	end,
+	on_beduino_request_data = function(pos, src, topic, payload)
+		if topic == 131 then  -- Chest State
+			local meta = minetest.get_meta(pos)
+			local inv = meta:get_inventory()
+			return 0, {techage.get_inv_state_num(inv, "main")}
+		elseif topic == 138 and payload[1] == 1 then  -- Sensor Chests State (action)
+			local meta = minetest.get_meta(pos)
+			local number = meta:get_string("node_number")
+			local action = (PlayerActions[number] or {})[2] or "None"
+			return 0, {({put = 1, get = 2})[action] or 0}
+		elseif topic == 138 and payload[1] == 2 then  -- Sensor Chests State (player name)
+			local meta = minetest.get_meta(pos)
+			local number = meta:get_string("node_number")
+			return 0, (PlayerActions[number] or {})[1]
+		elseif topic == 138 and payload[1] == 3 then  -- Sensor Chests State (stack item name)
+			local name, _ = get_stack(pos, payload[2] or 1)
+			return 0, name
+		elseif topic == 138 and payload[1] == 4 then  -- Sensor Chests State (stack item count)
+			local _, count = get_stack(pos, payload[2] or 1)
+			return 0, {count}
+		else
+			return 2, ""
+		end
+	end,
+})
 
 minetest.register_craft({
 	type = "shapeless",
 	output = "techage:ta4_sensor_chest",
 	recipe = {"techage:chest_ta4", "techage:ta4_wlanchip"}
 })
-

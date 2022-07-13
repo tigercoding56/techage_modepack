@@ -3,18 +3,18 @@
 	TechAge
 	=======
 
-	Copyright (C) 2019-2021 DS-Minetest, Joachim Stolberg
+	Copyright (C) 2019-2022 DS-Minetest, Joachim Stolberg
 
 	AGPL v3
 	See LICENSE.txt for more information
 
 	TA4 Power Wind Turbine Rotor
-	
+
 	Code by Joachim Stolberg, derived from DS-Minetest [1]
 	Rotor model and texture designed by DS-Minetest [1] (CC-0)
-	
+
 	[1] https://github.com/DS-Minetest/wind_turbine
-	
+
 ]]--
 
 -- for lazy programmers
@@ -28,7 +28,7 @@ local COUNTDOWN_TICKS = 2
 
 local Cable = techage.ElectricCable
 local power = networks.power
-local control = networks.control 
+local control = networks.control
 
 local Rotors = {}
 
@@ -60,20 +60,20 @@ local function check_rotor(pos, nvm)
 		nvm.error = err
 		return false
 	end
-	
+
 	local npos = techage.get_pos(pos, "F")
 	local node = techage.get_node_lvm(npos)
 	if node.name ~= "techage:ta4_wind_turbine_nacelle" then
 		nvm.error = S("Nacelle is missing")
 		return false
 	end
-	
+
 	local own_num = M(pos):get_string("node_number") or ""
 	M(pos):set_string("infotext", S("TA4 Wind Turbine")..": "..own_num)
 	nvm.error = false
 	return true
 end
-	
+
 local function formspec(self, pos, nvm)
 	return techage.generator_formspec(self, pos, nvm, S("TA4 Wind Turbine"), nvm.provided, PWR_PERF)
 end
@@ -91,7 +91,7 @@ local function add_rotor(pos, nvm, force)
 		obj:set_rotation(yaw)
 		Rotors[hash] = obj
 	end
-end	
+end
 
 local function start_rotor(pos, nvm, state)
 	if not nvm.error then
@@ -117,9 +117,11 @@ local function stop_rotor(pos, nvm, state)
 end
 
 local function can_start(pos, nvm)
+	check_rotor(pos, nvm)
 	if nvm.error then
 		return nvm.error
 	end
+	add_rotor(pos, nvm)
 	return true
 end
 
@@ -216,7 +218,7 @@ minetest.register_node("techage:ta4_wind_turbine", {
 		"techage_rotor.png",
 		"techage_rotor.png^techage_appl_open.png",
 	},
-	
+
 	after_place_node = after_place_node,
 	after_dig_node = after_dig_node,
 	get_generator_data = get_generator_data,
@@ -245,7 +247,7 @@ control.register_nodes({"techage:ta4_wind_turbine"}, {
 					running = techage.is_running(nvm) or false,
 					available = PWR_PERF,
 					provided = nvm.provided or 0,
-					termpoint = meta:get_string("termpoint"), 
+					termpoint = meta:get_string("termpoint"),
 				}
 			end
 			return false
@@ -280,7 +282,7 @@ minetest.register_entity("techage:rotor_ent", {initial_properties = {
 	static_save = false,
 }})
 
-techage.register_node({"techage:ta4_wind_turbine"}, {	
+techage.register_node({"techage:ta4_wind_turbine"}, {
 	on_recv_message = function(pos, src, topic, payload)
 		local nvm = techage.get_nvm(pos)
 		if topic == "state" then
@@ -305,9 +307,41 @@ techage.register_node({"techage:ta4_wind_turbine"}, {
 			return "unsupported"
 		end
 	end,
+	on_beduino_receive_cmnd = function(pos, src, topic, payload)
+		local nvm = techage.get_nvm(pos)
+		if topic == 1 and payload[1] == 1 then
+			State:start(pos, nvm)
+		elseif topic == 1 and payload[1] == 0 then
+			State:stop(pos, nvm)
+		else
+			return 2
+		end
+		return 0
+	end,
+	on_beduino_request_data = function(pos, src, topic, payload)
+		local nvm = techage.get_nvm(pos)
+		if topic == 129 then
+			local node = minetest.get_node(pos)
+			if node.name == "ignore" then  -- unloaded node?
+				return 0, {techage.UNLOADED}
+			end
+			if nvm.error then
+				return 0, {techage.FAULT}
+			elseif techage.is_running(nvm) then
+				return 0, {techage.RUNNING}
+			else
+				return 0, {techage.STOPPED}
+			end
+		elseif topic == 135 then  -- Delivered Power
+			return 0, {nvm.delivered or 0}
+		else
+			return 2, ""
+		end
+	end,
 	on_node_load = function(pos)
 		local nvm = techage.get_nvm(pos)
 		add_rotor(pos, nvm, true)
+		start_rotor(pos, nvm)
 		minetest.get_node_timer(pos):start(CYCLE_TIME)
 	end,
 })
@@ -355,8 +389,8 @@ minetest.register_craft({
 })
 
 techage.furnace.register_recipe({
-	output = "techage:ta4_carbon_fiber", 
-	recipe = {"default:papyrus", "default:stick", "default:papyrus", "default:stick"}, 
+	output = "techage:ta4_carbon_fiber",
+	recipe = {"default:papyrus", "default:stick", "default:papyrus", "default:stick"},
 	heat = 4,
 	time = 3,
 })

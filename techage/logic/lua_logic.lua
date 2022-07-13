@@ -3,7 +3,7 @@
 	TechAge
 	=======
 
-	Copyright (C) 2017-2020 Joachim Stolberg
+	Copyright (C) 2017-2022 Joachim Stolberg
 
 	AGPL v3
 	See LICENSE.txt for more information
@@ -89,7 +89,7 @@ local function eval(pos, nvm)
 			if sts == true and nvm.inp_tbl.outp ~= true then
 				nvm.inp_tbl.outp = sts
 				return "on"
-			elseif sts == false and nvm.inp_tbl.outp ~= false then 
+			elseif sts == false and nvm.inp_tbl.outp ~= false then
 				nvm.inp_tbl.outp = sts
 				return "off"
 			end
@@ -116,7 +116,7 @@ local function formspec(pos, meta)
 	local then_expr = meta:get_string("then_expr") or ""
 	local else_expr = meta:get_string("else_expr") or ""
 	local err = nvm.error or "ok"
-	if err ~= "ok" then 
+	if err ~= "ok" then
 		err = string.sub(err, 15)
 	end
 	err = minetest.formspec_escape(err)
@@ -164,7 +164,7 @@ minetest.register_node("techage:ta3_logic", {
 		if minetest.is_protected(pos, player:get_player_name()) then
 			return
 		end
-		
+
 		local meta = M(pos)
 		local nvm = techage.get_nvm(pos)
 		if fields.numbers and fields.numbers ~= "" then
@@ -187,7 +187,7 @@ minetest.register_node("techage:ta3_logic", {
 		end
 		meta:set_string("formspec", formspec(pos, meta))
 	end,
-	
+
 	on_timer = function(pos,elapsed)
 		local nvm = techage.get_nvm(pos)
 		local topic = eval(pos, nvm)
@@ -199,19 +199,19 @@ minetest.register_node("techage:ta3_logic", {
 		end
 		return false
 	end,
-	
+
 	techage_set_numbers = function(pos, numbers, player_name)
 		local meta = M(pos)
 		local res = logic.set_numbers(pos, numbers, player_name, S("TA3 Logic Block"))
 		meta:set_string("formspec", formspec(pos, meta))
 		return res
 	end,
-	
+
 	after_dig_node = function(pos, oldnode, oldmetadata)
 		techage.remove_node(pos, oldnode, oldmetadata)
 		techage.del_mem(pos)
 	end,
-	
+
 	paramtype2 = "facedir",
 	groups = {choppy=2, cracky=2, crumbly=2},
 	is_ground_content = false,
@@ -234,7 +234,7 @@ techage.register_node({"techage:ta3_logic"}, {
 	on_recv_message = function(pos, src, topic, payload)
 		local nvm = techage.get_nvm(pos)
 		nvm.inp_tbl = nvm.inp_tbl or {outp = false}
-		
+
 		if topic == "on" then
 			nvm.inp_tbl.inp = true
 			nvm.inp_tbl["n"..src] = true
@@ -246,9 +246,19 @@ techage.register_node({"techage:ta3_logic"}, {
 		end
 		minetest.get_node_timer(pos):start(0.1)
 	end,
-	on_node_load = function(pos)
-		
+	on_beduino_receive_cmnd = function(pos, src, topic, payload)
+		if topic == 1 and payload[1] == 1 then
+			nvm.inp_tbl.inp = true
+			nvm.inp_tbl["n"..src] = true
+			return 0
+		elseif topic == 1 and payload[1] == 0 then
+			nvm.inp_tbl.inp = false
+			nvm.inp_tbl["n"..src] = false
+			return 0
+		else
+			return 2
+		end
 	end,
-})		
-
-
+	on_node_load = function(pos)
+	end,
+})

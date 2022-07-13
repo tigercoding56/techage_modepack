@@ -9,7 +9,7 @@
 	See LICENSE.txt for more information
 
 	mark.lua:
-	
+
 ]]--
 
 local marker_region = {}
@@ -27,9 +27,9 @@ end
 function techage.mark_region(name, pos1, pos2, owner, secs)
 
 	if not name or not pos1 or not pos2 then return end
-	
+
 	techage.unmark_region(name)
-	
+
 	local thickness = 0.2
 	local sizex, sizey, sizez = (1 + pos2.x - pos1.x) / 2, (1 + pos2.y - pos1.y) / 2, (1 + pos2.z - pos1.z) / 2
 	local markers = {}
@@ -82,7 +82,7 @@ minetest.register_entity(":techage:region_cube", {
 	initial_properties = {
 		visual = "upright_sprite",
 		textures = {"techage_cube_mark.png"},
-		use_texture_alpha = true,
+		use_texture_alpha = techage.BLEND,
 		physical = false,
 		glow = 12,
 	},
@@ -96,4 +96,3 @@ minetest.register_entity(":techage:region_cube", {
 		techage.unmark_region(self.player_name)
 	end,
 })
-

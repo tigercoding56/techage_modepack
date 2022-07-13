@@ -3,11 +3,11 @@
 	TechAge
 	=======
 
-	Copyright (C) 2019-2021 Joachim Stolberg
+	Copyright (C) 2019-2022 Joachim Stolberg
 
 	AGPL v3
 	See LICENSE.txt for more information
-	
+
 	TA4 Fuel Cell
 
 ]]--
@@ -67,7 +67,7 @@ local function can_start(pos, nvm, state)
 end
 
 
-local function consuming(pos, nvm)	
+local function consuming(pos, nvm)
 	if nvm.num_pwr_units <= 0 then
 		nvm.num_pwr_units = nvm.num_pwr_units + PWR_UNITS_PER_HYDROGEN_ITEM
 		nvm.liquid.amount = nvm.liquid.amount - 1
@@ -190,7 +190,7 @@ minetest.register_node("techage:ta4_fuelcell", {
 		end
 		return liquid.is_empty(pos)
 	end,
-	
+
 	after_place_node = after_place_node,
 	after_dig_node = after_dig_node,
 	get_generator_data = get_generator_data,
@@ -199,7 +199,7 @@ minetest.register_node("techage:ta4_fuelcell", {
 	on_timer = node_timer,
 	on_rightclick = on_rightclick,
 	ta4_formspec = techage.generator_settings("ta4", PWR_PERF),
-	
+
 	paramtype2 = "facedir",
 	groups = {cracky=2, crumbly=2, choppy=2},
 	on_rotate = screwdriver.disallow,
@@ -304,7 +304,20 @@ techage.register_node({"techage:ta4_fuelcell", "techage:ta4_fuelcell_on"}, {
 			return State:on_receive_message(pos, topic, payload)
 		end
 	end,
-})	
+	on_beduino_receive_cmnd = function(pos, src, topic, payload)
+		return State:on_beduino_receive_cmnd(pos, topic, payload)
+	end,
+	on_beduino_request_data = function(pos, src, topic, payload)
+		local nvm = techage.get_nvm(pos)
+		if topic == 134 and payload[1] == 1 then
+			return 0, {techage.power.percent(CAPACITY, (nvm.liquid and nvm.liquid.amount) or 0)}
+		elseif topic == 135 then
+			return 0, {math.floor((nvm.provided or 0) + 0.5)}
+		else
+			return State:on_beduino_request_data(pos, topic, payload)
+		end
+	end,
+})
 
 control.register_nodes({"techage:ta4_fuelcell", "techage:ta4_fuelcell_on"}, {
 		on_receive = function(pos, tlib2, topic, payload)
@@ -319,7 +332,7 @@ control.register_nodes({"techage:ta4_fuelcell", "techage:ta4_fuelcell_on"}, {
 					running = techage.is_running(nvm) or false,
 					available = PWR_PERF,
 					provided = nvm.provided or 0,
-					termpoint = meta:get_string("termpoint"), 
+					termpoint = meta:get_string("termpoint"),
 				}
 			end
 			return false

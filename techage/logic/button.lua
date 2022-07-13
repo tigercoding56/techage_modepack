@@ -9,7 +9,7 @@
 	See LICENSE.txt for more information
 
 	TA3 & TA4 Logic button
-	
+
 ]]--
 
 -- for lazy programmers
@@ -19,6 +19,16 @@ local NDEF = function(pos) return (minetest.registered_nodes[techage.get_node_lv
 
 local logic = techage.logic
 
+local WRENCH_MENU = {
+	{
+		type = "ascii",
+		name = "command",
+		label = S("Command"),
+		tooltip = S("Command to be sent"),
+		default = "on",
+	},
+}
+
 local function switch_on(pos)
 	local cycle_time = M(pos):get_int("cycle_time")
 	local name = techage.get_node_lvm(pos).name
@@ -27,7 +37,10 @@ local function switch_on(pos)
 	elseif name == "techage:ta4_button_off" then
 		logic.swap_node(pos, "techage:ta4_button_on")
 	end
-	logic.send_on(pos, M(pos), cycle_time)
+	local meta = M(pos)
+	local s = meta:contains("command") and meta:get_string("command") or "on"
+	local command, payload = unpack(string.split(s, " ", false, 1))
+	logic.send_cmnd(pos, M(pos), command, payload, cycle_time)
 	minetest.sound_play("techage_button", {
 			pos = pos,
 			gain = 0.5,
@@ -42,7 +55,10 @@ local function switch_off(pos, is_button)
 	elseif name == "techage:ta4_button_on" then
 		logic.swap_node(pos, "techage:ta4_button_off")
 	end
-	logic.send_off(pos, M(pos))
+	local meta = M(pos)
+	if not meta:contains("command") or meta:get_string("command") == "on" then
+		logic.send_off(pos, M(pos))
+	end
 	if not is_button then
 		minetest.sound_play("techage_button", {
 				pos = pos,
@@ -58,7 +74,7 @@ local function formspec(meta)
 	if idx == 0 then idx = 1 end
 	local access_idx = meta:get_string("public") == "true" and 3 or meta:get_string("protected") == "true" and 2 or 1
 	return "size[7.5,6]"..
-		"dropdown[0.2,0;3;type;switch,button 1s,button 2s,button 4s,button 8s,button 16s,button 32s;"..idx.."]".. 
+		"dropdown[0.2,0;3;type;switch,button 1s,button 2s,button 4s,button 8s,button 16s,button 32s;"..idx.."]"..
 		"field[0.5,2;7,1;numbers;"..S("Insert destination node number(s)")..";"..numbers.."]" ..
 		"label[0.2,3;"..S("Access:").."]"..
 		"dropdown[3,3;4;access;private,protected,public;"..access_idx.."]"..
@@ -136,6 +152,9 @@ local function on_rightclick_on(pos, node, clicker)
 	if fixed == "true" then
 		if can_access(pos, clicker) then
 			switch_on(pos)
+			local mem = techage.get_mem(pos)
+			mem.clicker = clicker and clicker:get_player_name()
+			mem.time = math.floor(minetest.get_us_time() / 100000)
 		end
 	end
 end
@@ -187,7 +206,7 @@ minetest.register_node("techage:ta3_button_off", {
 	on_rightclick = on_rightclick_on,
 	techage_set_numbers = techage_set_numbers,
 	after_dig_node = after_dig_node,
-	
+
 	on_rotate = screwdriver.disallow,
 	paramtype2 = "facedir",
 	groups = {choppy=2, cracky=2, crumbly=2},
@@ -249,11 +268,12 @@ minetest.register_node("techage:ta4_button_off", {
 		meta:set_int("cycle_time", 0)
 	end,
 
+	ta4_formspec = WRENCH_MENU,
 	on_receive_fields = on_receive_fields,
 	on_rightclick = on_rightclick_on,
 	techage_set_numbers = techage_set_numbers,
 	after_dig_node = after_dig_node,
-	
+
 	on_rotate = screwdriver.disallow,
 	paramtype = "light",
 	use_texture_alpha = techage.CLIP,
@@ -318,3 +338,30 @@ minetest.register_craft({
 	},
 })
 
+techage.register_node({
+		"techage:ta4_button_off", "techage:ta4_button_on",
+	}, {
+		on_recv_message = function(pos, src, topic, payload)
+			if topic == "name" then
+				local mem = techage.get_mem(pos)
+				return mem.clicker or ""
+			elseif topic == "time" then
+				local mem = techage.get_mem(pos)
+				return mem.time or 0
+			else
+				return "unsupported"
+			end
+		end,
+		on_beduino_request_data = function(pos, src, topic, payload)
+			if topic == 144 then  -- Player Name
+				local mem = techage.get_mem(pos)
+				return 0, mem.clicker
+			elseif topic == 149 then  --time
+				local mem = techage.get_mem(pos)
+				return 0, {mem.time or 0}
+			else
+				return 2, ""
+			end
+		end,
+	}
+)

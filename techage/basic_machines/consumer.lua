@@ -3,14 +3,14 @@
 	TechAge
 	=======
 
-	Copyright (C) 2019-2020 Joachim Stolberg
+	Copyright (C) 2019-2022 Joachim Stolberg
 
 	AGPL v3
 	See LICENSE.txt for more information
-	
+
 	Consumer node basis functionality.
 	It handles:
-	- up to 3 stages of nodes (TA2/TA3/TA4)
+	- up to 4 stages of nodes (TA2/TA3/TA4/TA5)
 	- power consumption
 	- node state handling
 	- registration of passive and active nodes
@@ -54,7 +54,7 @@ end
 local function node_timer_pas(pos, elapsed)
 	local crd = CRD(pos)
 	local nvm = techage.get_nvm(pos)
-	
+
 	-- handle power consumption
 	if crd.power_netw and techage.needs_power(nvm) then
 		local consumed = power.consume_power(pos, crd.power_netw, nil, crd.power_consumption)
@@ -62,7 +62,7 @@ local function node_timer_pas(pos, elapsed)
 			crd.State:start(pos, nvm)
 		end
 	end
-	
+
 		-- call the node timer routine
 	if techage.is_operational(nvm) then
 		nvm.node_timer_call_cyle = (nvm.node_timer_call_cyle or 0) + 1
@@ -77,7 +77,7 @@ end
 local function node_timer_act(pos, elapsed)
 	local crd = CRD(pos)
 	local nvm = techage.get_nvm(pos)
-	
+
 	-- handle power consumption
 	if crd.power_netw and techage.needs_power(nvm) then
 		local consumed = power.consume_power(pos, crd.power_netw, nil, crd.power_consumption)
@@ -85,7 +85,7 @@ local function node_timer_act(pos, elapsed)
 			crd.State:nopower(pos, nvm)
 		end
 	end
-	
+
 	-- call the node timer routine
 	if techage.is_operational(nvm) then
 		nvm.node_timer_call_cyle = (nvm.node_timer_call_cyle or 0) + 1
@@ -111,7 +111,7 @@ local function prepare_tiles(tiles, stage, power_png)
 	return tbl
 end
 
--- 'validStates' is optional and can be used to e.g. enable 
+-- 'validStates' is optional and can be used to e.g. enable
 -- only one TA2 node {false, true, false, false}
 function techage.register_consumer(base_name, inv_name, tiles, tNode, validStates, node_name_prefix)
 	local names = {}
@@ -119,7 +119,7 @@ function techage.register_consumer(base_name, inv_name, tiles, tNode, validState
 	if not node_name_prefix then
 		node_name_prefix = "techage:ta"
 	end
-	for stage = 2,4 do
+	for stage = 2,5 do
 		local name_pas = node_name_prefix..stage.."_"..base_name.."_pas"
 		local name_act = node_name_prefix..stage.."_"..base_name.."_act"
 		local name_inv = "TA"..stage.." "..inv_name
@@ -152,6 +152,7 @@ function techage.register_consumer(base_name, inv_name, tiles, tNode, validState
 				formspec_func = tNode.formspec,
 				on_state_change = tNode.on_state_change,
 				can_start = tNode.can_start,
+				quick_start = tNode.quick_start,
 				has_power = tNode.has_power or power_used and has_power or nil,
 				start_node = power_used and start_node or nil,
 				stop_node = power_used and stop_node or nil,
@@ -162,7 +163,7 @@ function techage.register_consumer(base_name, inv_name, tiles, tNode, validState
 				State = tState,
 				-- number of items to be processed per cycle
 				num_items = tNode.num_items and tNode.num_items[stage],
-				power_consumption = power_used and 
+				power_consumption = power_used and
 				tNode.power_consumption[stage] or 0,
 				node_timer = tNode.node_timer,
 				cycle_time = tNode.cycle_time,
@@ -177,6 +178,7 @@ function techage.register_consumer(base_name, inv_name, tiles, tNode, validState
 				local node = minetest.get_node(pos)
 				meta:set_int("push_dir", techage.side_to_indir("L", node.param2))
 				meta:set_int("pull_dir", techage.side_to_indir("R", node.param2))
+				meta:set_string("owner", placer:get_player_name())
 				-- Delete existing node number. Needed for Digtron compatibility.
 				if (meta:contains("node_number")) then
 					meta:set_string("node_number", "")
@@ -202,7 +204,7 @@ function techage.register_consumer(base_name, inv_name, tiles, tNode, validState
 				techage.remove_node(pos, oldnode, oldmetadata)
 				techage.del_mem(pos)
 			end
-			
+
 			tNode.groups.not_in_creative_inventory = 0
 
 			local def_pas = {
@@ -227,6 +229,7 @@ function techage.register_consumer(base_name, inv_name, tiles, tNode, validState
 				on_metadata_inventory_move = tNode.on_metadata_inventory_move,
 				on_metadata_inventory_put = tNode.on_metadata_inventory_put,
 				on_metadata_inventory_take = tNode.on_metadata_inventory_take,
+				ta_rotate_node = tNode.ta_rotate_node,
 
 				paramtype = tNode.paramtype,
 				paramtype2 = "facedir",
@@ -267,6 +270,7 @@ function techage.register_consumer(base_name, inv_name, tiles, tNode, validState
 				on_metadata_inventory_move = tNode.on_metadata_inventory_move,
 				on_metadata_inventory_put = tNode.on_metadata_inventory_put,
 				on_metadata_inventory_take = tNode.on_metadata_inventory_take,
+				ta_rotate_node = tNode.ta_rotate_node,
 
 				paramtype = tNode.paramtype,
 				paramtype2 = "facedir",
@@ -283,19 +287,19 @@ function techage.register_consumer(base_name, inv_name, tiles, tNode, validState
 					def_act[k] = v
 				end
 			end
-			
+
 			minetest.register_node(name_act, def_act)
 
 			if power_used then
 				power.register_nodes({name_pas, name_act}, power_network, "con", sides)
 			end
 			techage.register_node({name_pas, name_act}, tNode.tubing)
-			
+
 			if tNode.tube_sides then
 				Tube:set_valid_sides(name_pas, get_keys(tNode.tube_sides))
 				Tube:set_valid_sides(name_act, get_keys(tNode.tube_sides))
 			end
 		end
 	end
-	return names[1], names[2], names[3]
+	return names[1], names[2], names[3], names[4]
 end

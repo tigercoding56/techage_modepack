@@ -6,7 +6,7 @@
 This modpack covers all necessary and useful mods to be able to use techage.
 All mods have the own README.txt. For further information please consult these files.
 
-This modpack includes:
+This modpack contains:
 - techage: The main mod
 - ta4_jetpack: A Jetpack for techage with hydrogen as fuel and TA4 recipe
 - ta4_paraglider: A Paraglider for techage with TA4 recipe
@@ -21,7 +21,7 @@ This modpack includes:
 - basic_materials: Needed items for many recipes
 - stamina: The "hunger" mod from "minetest-mods"
 - doc: Ingame documentation mod, used for minecart and signs_bot
-- unified_inventory V1: Player's inventory with crafting guide, bags, and more.
+- unified_inventory: Player's inventory with crafting guide, bags, and more.
 - tubelib2: Necessary library
 - networks: Necessary library
 - safer_lua: Necessary library
@@ -48,6 +48,55 @@ ta4_jetpack requires the modpack 3d_armor. 3d_armor is itself a modpack and can'
 
 
 ### History
+
+
+#### 2022-07-11
+
+Updated Mods:
+- techage V1.08 with improvements and bug fixes
+- signs_bot
+- tubelib2
+- unified_inventory
+- lcdlib
+
+#### 2022-01-28
+
+Updated Mods:
+- techage (fusion reactor added)
+
+
+#### 2022-01-04
+
+Updated Mods:
+- techage (bugfixes)
+
+
+#### 2022-01-03
+
+Updated Mods:
+- techage (see readme)
+- hyperloop (see readme)
+- minecart (bugfix)
+- unified_inventory (see readme)
+- ta4_addons (see readme)
+
+
+#### 2021-10-30
+
+Updated Mods:
+- techage (see readme)
+- signs_bot (see readme)
+- minecart (bugfix)
+- lcdlib (improvement)
+
+
+#### 2021-09-18
+
+Updated Mods:
+- techage (see readme)
+- signs_bot (see readme)
+- networks (see readme)
+- ta4_addons (add matrix screen)
 
 
 #### 2021-09-04

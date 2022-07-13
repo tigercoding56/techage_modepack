@@ -3,11 +3,11 @@
 	TechAge
 	=======
 
-	Copyright (C) 2019-2021 Joachim Stolberg
+	Copyright (C) 2019-2022 Joachim Stolberg
 
 	AGPL v3
 	See LICENSE.txt for more information
-	
+
 	TA3 Coal Power Station Firebox
 
 ]]--
@@ -28,7 +28,7 @@ local BURN_CYCLE_FACTOR = 0.5
 local function node_timer(pos, elapsed)
 	local nvm = techage.get_nvm(pos)
 	local power = techage.transfer(
-		{x=pos.x, y=pos.y+2, z=pos.z}, 
+		{x=pos.x, y=pos.y+2, z=pos.z},
 		nil,  -- outdir
 		"trigger",  -- topic
 		nil,  -- payload
@@ -85,7 +85,7 @@ minetest.register_node("techage:oilfirebox", {
 	can_dig = fuel.can_dig,
 	on_rightclick = fuel.on_rightclick,
 	on_receive_fields = fuel.on_receive_fields,
-	
+
 	after_place_node = function(pos, placer)
 		if firebox.is_free_position(pos, placer:get_player_name()) then
 			techage.add_node(pos, "techage:oilfirebox")
@@ -103,7 +103,7 @@ minetest.register_node("techage:oilfirebox", {
 			return true
 		end
 	end,
-	
+
 	on_destruct = function(pos)
 		firebox.set_firehole(pos, nil)
 	end,
@@ -132,6 +132,18 @@ techage.register_node({"techage:oilfirebox"}, {
 			return "unsupported"
 		end
 	end,
+	on_beduino_request_data = function(pos, src, topic, payload)
+		local nvm = techage.get_nvm(pos)
+		if topic == 128 then
+			return 0, techage.get_node_lvm(pos).name
+		elseif topic == 129 then
+			return 0, {nvm.running and techage.RUNNING or techage.STOPPED}
+		elseif topic == 132 then
+			return 0, {fuel.get_fuel_amount(nvm)}
+		else
+			return 2, ""
+		end
+	end,
 })
 
 minetest.register_craft({
@@ -142,5 +154,3 @@ minetest.register_craft({
 		{'', '', ''},
 	},
 })
-
-

@@ -3,13 +3,13 @@
 	TechAge
 	=======
 
-	Copyright (C) 2019-2020 Joachim Stolberg
+	Copyright (C) 2019-2022 Joachim Stolberg
 
 	AGPL v3
 	See LICENSE.txt for more information
 
 	TA2/TA3/TA4 Electronic Fab
-	
+
 ]]--
 
 -- for lazy programmers
@@ -32,21 +32,19 @@ local RecipeType = {
 
 local function formspec(self, pos, nvm)
 	local rtype = RecipeType[CRD(pos).stage]
+	local owner = M(pos):get_string("owner")
 	return "size[8.4,8.4]"..
-	default.gui_bg..
-	default.gui_bg_img..
-	default.gui_slots..
-	"list[context;src;0,0;2,4;]"..
-	recipes.formspec(2.2, 0, rtype, nvm)..
-	"list[context;dst;6.4,0;2,4;]"..
-	"image_button[3.7,3.3;1,1;".. self:get_state_button_image(nvm) ..";state_button;]"..
-	"tooltip[3.7,3.3;1,1;"..self:get_state_tooltip(nvm).."]"..
-	"list[current_player;main;0.2,4.5;8,4;]"..
-	"listring[context;dst]"..
-	"listring[current_player;main]"..
-	"listring[context;src]"..
-	"listring[current_player;main]"..
-	default.get_hotbar_bg(0.2, 4.5)
+		"list[context;src;0,0;2,4;]"..
+		recipes.formspec(2.2, 0, rtype, nvm, owner)..
+		"list[context;dst;6.4,0;2,4;]"..
+		"image_button[3.7,3.3;1,1;".. self:get_state_button_image(nvm) ..";state_button;]"..
+		"tooltip[3.7,3.3;1,1;"..self:get_state_tooltip(nvm).."]"..
+		"list[current_player;main;0.2,4.5;8,4;]"..
+		"listring[context;dst]"..
+		"listring[current_player;main]"..
+		"listring[context;src]"..
+		"listring[current_player;main]"..
+		default.get_hotbar_bg(0.2, 4.5)
 end
 
 local function allow_metadata_inventory_put(pos, listname, index, stack, player)
@@ -76,8 +74,9 @@ local function allow_metadata_inventory_take(pos, listname, index, stack, player
 end
 
 local function making(pos, crd, nvm, inv)
+	local owner = M(pos):get_string("owner")
 	local rtype = RecipeType[crd.stage]
-	local recipe = recipes.get(nvm, rtype)
+	local recipe = recipes.get(nvm, rtype, owner)
 	local output = ItemStack(recipe.output.name.." "..recipe.output.num)
 	if inv:room_for_item("dst", output) then
 		for _,item in ipairs(recipe.input) do
@@ -111,14 +110,14 @@ local function on_receive_fields(pos, formname, fields, player)
 	if minetest.is_protected(pos, player:get_player_name()) then
 		return
 	end
-	
+
 	local nvm = techage.get_nvm(pos)
 	local crd = CRD(pos)
-	
-	if not nvm.running then	
+
+	if not nvm.running then
 		recipes.on_receive_fields(pos, formname, fields, player)
 	end
-	
+
 	crd.State:state_button_event(pos, nvm, fields)
 	M(pos):set_string("formspec", formspec(crd.State, pos, nvm))
 end
@@ -204,12 +203,18 @@ local tubing = {
 	on_recv_message = function(pos, src, topic, payload)
 		return CRD(pos).State:on_receive_message(pos, topic, payload)
 	end,
+	on_beduino_receive_cmnd = function(pos, src, topic, payload)
+		return CRD(pos).State:on_beduino_receive_cmnd(pos, topic, payload)
+	end,
+	on_beduino_request_data = function(pos, src, topic, payload)
+		return CRD(pos).State:on_beduino_request_data(pos, topic, payload)
+	end,
 	on_node_load = function(pos)
 		CRD(pos).State:on_node_load(pos)
 	end,
 }
 
-local node_name_ta2, node_name_ta3, node_name_ta4 = 
+local node_name_ta2, node_name_ta3, node_name_ta4 =
 	techage.register_consumer("electronic_fab", S("Electronic Fab"), tiles, {
 		drawtype = "normal",
 		cycle_time = CYCLE_TIME,
@@ -261,24 +266,21 @@ minetest.register_craft({
 	},
 })
 
-if minetest.global_exists("unified_inventory") then
-	unified_inventory.register_craft_type("ta2_electronic_fab", {
-		description = S("TA2 Ele Fab"),
-		icon = 'techage_filling_ta2.png^techage_appl_electronic_fab.png^techage_frame_ta2.png',
-		width = 2,
-		height = 2,
-	})
-	unified_inventory.register_craft_type("ta3_electronic_fab", {
-		description = S("TA3 Ele Fab"),
-		icon = 'techage_filling_ta3.png^techage_appl_electronic_fab.png^techage_frame_ta3.png',
-		width = 2,
-		height = 2,
-	})
-	unified_inventory.register_craft_type("ta4_electronic_fab", {
-		description = S("TA4 Ele Fab"),
-		icon = 'techage_filling_ta4.png^techage_appl_electronic_fab.png^techage_frame_ta4.png',
-		width = 2,
-		height = 2,
-	})
-end
-
+techage.recipes.register_craft_type("ta2_electronic_fab", {
+	description = S("TA2 Ele Fab"),
+	icon = 'techage_filling_ta2.png^techage_appl_electronic_fab.png^techage_frame_ta2.png',
+	width = 2,
+	height = 2,
+})
+techage.recipes.register_craft_type("ta3_electronic_fab", {
+	description = S("TA3 Ele Fab"),
+	icon = 'techage_filling_ta3.png^techage_appl_electronic_fab.png^techage_frame_ta3.png',
+	width = 2,
+	height = 2,
+})
+techage.recipes.register_craft_type("ta4_electronic_fab", {
+	description = S("TA4 Ele Fab"),
+	icon = 'techage_filling_ta4.png^techage_appl_electronic_fab.png^techage_frame_ta4.png',
+	width = 2,
+	height = 2,
+})

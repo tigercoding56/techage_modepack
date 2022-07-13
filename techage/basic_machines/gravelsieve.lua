@@ -3,13 +3,13 @@
 	TechAge
 	=======
 
-	Copyright (C) 2019-2021 Joachim Stolberg
+	Copyright (C) 2019-2022 Joachim Stolberg
 
 	AGPL v3
 	See LICENSE.txt for more information
-	
+
 	TA2/TA3/TA4 Gravel Sieve, sieving gravel to find ores
-	
+
 ]]--
 
 -- for lazy programmers
@@ -174,12 +174,18 @@ local tubing = {
 	on_recv_message = function(pos, src, topic, payload)
 		return CRD(pos).State:on_receive_message(pos, topic, payload)
 	end,
+	on_beduino_receive_cmnd = function(pos, src, topic, payload)
+		return CRD(pos).State:on_beduino_receive_cmnd(pos, topic, payload)
+	end,
+	on_beduino_request_data = function(pos, src, topic, payload)
+		return CRD(pos).State:on_beduino_request_data(pos, topic, payload)
+	end,
 	on_node_load = function(pos)
 		CRD(pos).State:on_node_load(pos)
 	end,
 }
 
-local node_name_ta2, node_name_ta3, node_name_ta4 = 
+local node_name_ta2, node_name_ta3, node_name_ta4 =
 	techage.register_consumer("gravelsieve", S("Gravel Sieve"), tiles, {
 		drawtype = "nodebox",
 		paramtype = "light",
@@ -246,38 +252,36 @@ minetest.register_craft({
 	},
 })
 
-if minetest.global_exists("unified_inventory") then
-	unified_inventory.register_craft_type("ta2_gravelsieve", {
-		description = S("TA2 Gravel Sieve"),
-		icon = 'techage_sieve_sieve_ta1.png',
-		width = 1,
-		height = 1,
-	})
-	unified_inventory.register_craft_type("ta3_gravelsieve", {
-		description = S("TA3 Gravel Sieve"),
-		icon = 'techage_filling_ta3.png^techage_appl_sieve.png^techage_frame_ta3.png',
-		width = 1,
-		height = 1,
-	})
-	unified_inventory.register_craft_type("ta4_gravelsieve", {
-		description = S("TA4 Gravel Sieve"),
-		icon = 'techage_filling_ta4.png^techage_appl_sieve.png^techage_frame_ta4.png',
-		width = 1,
-		height = 1,
-	})
-	unified_inventory.register_craft({
-		output = "techage:sieved_basalt_gravel", 
-		items = {"techage:basalt_gravel"},
-		type = "ta2_gravelsieve",
-	})
-	unified_inventory.register_craft({
-		output = "techage:sieved_basalt_gravel", 
-		items = {"techage:basalt_gravel"},
-		type = "ta3_gravelsieve",
-	})
-	unified_inventory.register_craft({
-		output = "techage:sieved_basalt_gravel", 
-		items = {"techage:basalt_gravel"},
-		type = "ta4_gravelsieve",
-	})
-end
+techage.recipes.register_craft_type("ta2_gravelsieve", {
+	description = S("TA2 Gravel Sieve"),
+	icon = 'techage_sieve_sieve_ta1.png',
+	width = 1,
+	height = 1,
+})
+techage.recipes.register_craft_type("ta3_gravelsieve", {
+	description = S("TA3 Gravel Sieve"),
+	icon = 'techage_filling_ta3.png^techage_appl_sieve.png^techage_frame_ta3.png',
+	width = 1,
+	height = 1,
+})
+techage.recipes.register_craft_type("ta4_gravelsieve", {
+	description = S("TA4 Gravel Sieve"),
+	icon = 'techage_filling_ta4.png^techage_appl_sieve.png^techage_frame_ta4.png',
+	width = 1,
+	height = 1,
+})
+techage.recipes.register_craft({
+	output = "techage:sieved_basalt_gravel",
+	items = {"techage:basalt_gravel"},
+	type = "ta2_gravelsieve",
+})
+techage.recipes.register_craft({
+	output = "techage:sieved_basalt_gravel",
+	items = {"techage:basalt_gravel"},
+	type = "ta3_gravelsieve",
+})
+techage.recipes.register_craft({
+	output = "techage:sieved_basalt_gravel",
+	items = {"techage:basalt_gravel"},
+	type = "ta4_gravelsieve",
+})

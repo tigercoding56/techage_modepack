@@ -3,11 +3,11 @@
 	TechAge
 	=======
 
-	Copyright (C) 2019-2021 Joachim Stolberg
+	Copyright (C) 2019-2022 Joachim Stolberg
 
 	AGPL v3
 	See LICENSE.txt for more information
-	
+
 	TA3 Tiny Power Generator
 
 ]]--
@@ -47,7 +47,7 @@ local function play_sound(pos)
 	local mem = techage.get_mem(pos)
 	if not mem.handle or mem.handle == -1 then
 		mem.handle = minetest.sound_play("techage_generator", {
-			pos = pos, 
+			pos = pos,
 			gain = 1,
 			max_hear_distance = 10,
 			loop = true})
@@ -70,8 +70,8 @@ local function has_fuel(pos, nvm)
 end
 
 local function can_start(pos, nvm, state)
-	if has_fuel(pos, nvm) then 
-		return true 
+	if has_fuel(pos, nvm) then
+		return true
 	end
 	return S("no fuel")
 end
@@ -106,7 +106,7 @@ local State = techage.NodeStates:new({
 
 local function burning(pos, nvm)
 	local ratio = math.max((nvm.provided or PWR_PERF) / PWR_PERF, 0.02)
-	
+
 	nvm.liquid = nvm.liquid or {}
 	nvm.liquid.amount = nvm.liquid.amount or 0
 	nvm.burn_cycles = (nvm.burn_cycles or 0) - ratio
@@ -116,7 +116,7 @@ local function burning(pos, nvm)
 			nvm.burn_cycles = fuel.burntime(nvm.liquid.name) * EFFICIENCY / CYCLE_TIME
 			nvm.burn_cycles_total = nvm.burn_cycles
 		else
-			nvm.liquid.name = nil 
+			nvm.liquid.name = nil
 		end
 	end
 end
@@ -127,10 +127,10 @@ local function node_timer(pos, elapsed)
 	local fuel = has_fuel(pos, nvm)
 	if running and not fuel then
 		State:standby(pos, nvm, S("no fuel"))
-        stop_node(pos, nvm, State)
+		stop_node(pos, nvm, State)
 	elseif not running and fuel then
 		State:start(pos, nvm)
-        -- start_node() is called implicit
+		-- start_node() is called implicit
 	elseif running then
 		local meta = M(pos)
 		local outdir = meta:get_int("outdir")
@@ -166,7 +166,7 @@ end
 
 local function get_generator_data(pos, outdir, tlib2)
 	local nvm = techage.get_nvm(pos)
-	if nvm.running and techage.is_running(nvm) then
+	if techage.is_running(nvm) then
 		return {level = (nvm.load or 0) / PWR_PERF, perf = PWR_PERF, capa = PWR_PERF * 2}
 	end
 end
@@ -190,7 +190,6 @@ minetest.register_node("techage:tiny_generator", {
 	after_place_node = function(pos, placer, itemstack)
 		local nvm = techage.get_nvm(pos)
 		local number = techage.add_node(pos, "techage:tiny_generator")
-		nvm.running = false
 		nvm.burn_cycles = 0
 		if itemstack then
 			local stack_meta = itemstack:get_meta()
@@ -211,7 +210,7 @@ minetest.register_node("techage:tiny_generator", {
 		Pipe:after_place_node(pos)
 		Cable:after_place_node(pos)
 	end,
-	
+
 	after_dig_node = function(pos, oldnode)
 		Pipe:after_dig_node(pos)
 		Cable:after_dig_node(pos)
@@ -232,7 +231,7 @@ minetest.register_node("techage:tiny_generator", {
 	end,
 
 	get_generator_data = get_generator_data,
-	ta3_formspec = techage.generator_settings("ta3", PWR_PERF), 
+	ta3_formspec = techage.generator_settings("ta3", PWR_PERF),
 	on_receive_fields = on_receive_fields,
 	on_rightclick = on_rightclick,
 	on_punch = fuel.on_punch,
@@ -268,7 +267,7 @@ minetest.register_node("techage:tiny_generator_on", {
 			},
 		},
 	},
-	
+
 	paramtype = "light",
 	paramtype2 = "facedir",
 	groups = {not_in_creative_inventory=1},
@@ -278,7 +277,7 @@ minetest.register_node("techage:tiny_generator_on", {
 	is_ground_content = false,
 
 	get_generator_data = get_generator_data,
-	ta3_formspec = techage.generator_settings("ta3", PWR_PERF), 
+	ta3_formspec = techage.generator_settings("ta3", PWR_PERF),
 	on_receive_fields = on_receive_fields,
 	on_rightclick = on_rightclick,
 	on_punch = fuel.on_punch,
@@ -339,6 +338,19 @@ techage.register_node({"techage:tiny_generator", "techage:tiny_generator_on"}, {
 			return State:on_receive_message(pos, topic, payload)
 		end
 	end,
+	on_beduino_receive_cmnd = function(pos, src, topic, payload)
+		return State:on_beduino_receive_cmnd(pos, topic, payload)
+	end,
+	on_beduino_request_data = function(pos, src, topic, payload)
+		local nvm = techage.get_nvm(pos)
+		if topic == 135 then
+			return 0, {nvm.provided or 0}
+		elseif topic == 132 then
+			return 0, {techage.fuel.get_fuel_amount(nvm)}
+		else
+			return State:on_beduino_request_data(pos, topic, payload)
+		end
+	end,
 	on_node_load = function(pos, node)
 		State:on_node_load(pos)
 		if node.name == "techage:tiny_generator_on" then
@@ -352,9 +364,9 @@ techage.register_node({"techage:tiny_generator", "techage:tiny_generator_on"}, {
 			nvm.liquid.amount = (nvm.liquid.amount or 0) + count
 			nvm.liquid.name = "techage:gasoline"
 			inv:set_stack("fuel", 1, nil)
-		end	
+		end
 	end,
-})	
+})
 
 minetest.register_craft({
 	output = "techage:tiny_generator",
@@ -364,4 +376,3 @@ minetest.register_craft({
 		{'default:steel_ingot', 'techage:vacuum_tube', 'default:steel_ingot'},
 	},
 })
-

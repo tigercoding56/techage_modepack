@@ -3,11 +3,11 @@
 	TechAge
 	=======
 
-	Copyright (C) 2019-2020 Joachim Stolberg
+	Copyright (C) 2019-2022 Joachim Stolberg
 
 	AGPL v3
 	See LICENSE.txt for more information
-	
+
 	TA3 Coal Power Station Firebox
 
 ]]--
@@ -25,7 +25,7 @@ local BURN_CYCLE_FACTOR = 0.5
 local function node_timer(pos, elapsed)
 	local nvm = techage.get_nvm(pos)
 	local power = techage.transfer(
-		{x=pos.x, y=pos.y+2, z=pos.z}, 
+		{x=pos.x, y=pos.y+2, z=pos.z},
 		nil,  -- outdir
 		"trigger",  -- topic
 		nil,  -- payload
@@ -34,7 +34,7 @@ local function node_timer(pos, elapsed)
 	)
 	nvm.burn_cycles = (nvm.burn_cycles or 0) - math.max((power or 0.02), 0.02)
 	if nvm.burn_cycles <= 0 then
-		local taken = firebox.get_fuel(pos) 
+		local taken = firebox.get_fuel(pos)
 		if taken then
 			nvm.burn_cycles = (firebox.Burntime[taken:get_name()] or 1) / CYCLE_TIME * BURN_CYCLE_FACTOR
 			nvm.burn_cycles_total = nvm.burn_cycles
@@ -83,7 +83,7 @@ minetest.register_node("techage:coalfirebox", {
 	allow_metadata_inventory_put = firebox.allow_metadata_inventory_put,
 	allow_metadata_inventory_take = firebox.allow_metadata_inventory_take,
 	on_rightclick = firebox.on_rightclick,
-	
+
 	after_place_node = function(pos, placer)
 		if firebox.is_free_position(pos, placer:get_player_name()) then
 			techage.add_node(pos, "techage:coalfirebox")
@@ -205,6 +205,18 @@ techage.register_node({"techage:coalfirebox"}, {
 			return techage.fuel.get_fuel_amount(nvm)
 		else
 			return "unsupported"
+		end
+	end,
+	on_beduino_request_data = function(pos, src, topic, payload)
+		local nvm = techage.get_nvm(pos)
+		if topic == 128 then
+			return 0, techage.get_node_lvm(pos).name
+		elseif topic == 129 then
+			return 0, {nvm.running and techage.RUNNING or techage.STOPPED}
+		elseif topic == 132 then
+			return 0, {techage.fuel.get_fuel_amount(nvm)}
+		else
+			return 2, ""
 		end
 	end,
 })

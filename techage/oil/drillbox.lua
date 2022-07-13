@@ -3,13 +3,13 @@
 	TechAge
 	=======
 
-	Copyright (C) 2019-2020 Joachim Stolberg
+	Copyright (C) 2019-2022 Joachim Stolberg
 
 	AGPL v3
 	See LICENSE.txt for more information
 
 	TA3 Oil Drill Box
-	
+
 ]]--
 
 -- for lazy programmers
@@ -34,7 +34,7 @@ local function play_sound(pos)
 	local mem = techage.get_mem(pos)
 	if not mem.handle or mem.handle == -1 then
 		mem.handle = minetest.sound_play("techage_oildrill", {
-			pos = pos, 
+			pos = pos,
 			gain = 1,
 			max_hear_distance = 15,
 			loop = true})
@@ -130,7 +130,7 @@ local function drilling(pos, crd, nvm, inv)
 	local curr_depth = pos.y - (nvm.drill_pos or pos).y
 	local node = techage.get_node_lvm(nvm.drill_pos)
 	local ndef = minetest.registered_nodes[node.name]
-	
+
 	if not inv:contains_item("src", ItemStack("techage:oil_drillbit")) then
 		crd.State:idle(pos, nvm, S("Drill bits missing"))
 	elseif curr_depth >= depth then
@@ -149,7 +149,7 @@ local function drilling(pos, crd, nvm, inv)
 		inv:remove_item("src", ItemStack("techage:oil_drillbit"))
 		nvm.drill_pos.y = nvm.drill_pos.y-1
 		crd.State:keep_running(pos, nvm, COUNTDOWN_TICKS)
-	elseif techage.can_node_dig(node, ndef) then
+	elseif techage.can_dig_node(node.name, ndef) then
 		local drop_name = techage.dropped_node(node, ndef)
 		if drop_name then
 			local item = ItemStack(drop_name)
@@ -255,6 +255,12 @@ local tubing = {
 	on_recv_message = function(pos, src, topic, payload)
 		return CRD(pos).State:on_receive_message(pos, topic, payload)
 	end,
+	on_beduino_receive_cmnd = function(pos, src, topic, payload)
+		return CRD(pos).State:on_beduino_receive_cmnd(pos, topic, payload)
+	end,
+	on_beduino_request_data = function(pos, src, topic, payload)
+		return CRD(pos).State:on_beduino_request_data(pos, topic, payload)
+	end,
 	on_node_load = function(pos, node)
 		CRD(pos).State:on_node_load(pos)
 		local nvm = techage.get_nvm(pos)
@@ -265,7 +271,7 @@ local tubing = {
 	end,
 }
 
-local _, node_name_ta3, _ = 
+local _, node_name_ta3, _ =
 	techage.register_consumer("drillbox", S("Oil Drill Box"), tiles, {
 		drawtype = "normal",
 		cycle_time = CYCLE_TIME,
@@ -279,7 +285,7 @@ local _, node_name_ta3, _ =
 			inv:set_size("dst", 1)
 			local info = techage.explore.get_oil_info(pos)
 			M(pos):set_int("depth", info.depth - 5)  -- oil bubble
-			M(pos):set_int("amount", info.amount) 
+			M(pos):set_int("amount", info.amount)
 			M(pos):set_string("oil_found", "false")
 			M(pos):set_string("owner", placer:get_player_name())
 		end,

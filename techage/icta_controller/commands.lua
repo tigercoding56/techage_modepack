@@ -7,7 +7,7 @@
 
 	AGPL v3
 	See LICENSE.txt for more information
-	
+
 	ICTA Controller - Register all controller commands
 
 ]]--
@@ -42,9 +42,9 @@ techage.icta_register_condition("initial", {
 	title = "initial",
 	formspec = {
 		{
-			type = "label", 
-			name = "lbl", 
-			label = "Condition is true only after\ncontroller start.", 
+			type = "label",
+			name = "lbl",
+			label = "Condition is true only after\ncontroller start.",
 		},
 	},
 	-- Return two chunks of executable Lua code for the controller, according:
@@ -65,9 +65,9 @@ techage.icta_register_condition("true", {
 	title = "true",
 	formspec = {
 		{
-			type = "label", 
-			name = "lbl", 
-			label = "Condition is always true.", 
+			type = "label",
+			name = "lbl",
+			label = "Condition is always true.",
 		},
 	},
 	code = function(data, environ)
@@ -86,23 +86,23 @@ techage.icta_register_condition("condition", {
 	title = "condition",
 	formspec = {
 		{
-			type = "textlist", 
+			type = "textlist",
 			name = "condition",
-			label = "condition row number",      
-			choices = "1,2,3,4,5,6,7,8", 
+			label = "condition row number",
+			choices = "1,2,3,4,5,6,7,8",
 			default = "",
 		},
 		{
 			type = "textlist",
 			name = "operand",
-			label = "condition",      
+			label = "condition",
 			choices = "was true, was not true",
 			default = "was true",
 		},
 		{
-			type = "label", 
-			name = "lbl", 
-			label = "Used to execute two or more\nactions based on one condition.", 
+			type = "label",
+			name = "lbl",
+			label = "Used to execute two or more\nactions based on one condition.",
 		},
 	},
 	code = function(data, environ)
@@ -140,9 +140,9 @@ techage.icta_register_condition("input", {
 			default = "on",
 		},
 		{
-			type = "label", 
-			name = "lbl", 
-			label = "An input is only available,\nif a block sends on/off\ncommands to the controller.", 
+			type = "label",
+			name = "lbl",
+			label = "An input is only available,\nif a block sends on/off\ncommands to the controller.",
 		},
 	},
 	button = function(data, environ)  -- default button label
@@ -153,7 +153,7 @@ techage.icta_register_condition("input", {
 			return env.input[data.number]
 		end
 		local result = function(val)
-			return techage.compare(val, data.value, data.operand)
+			return techage.compare(val, tonumber(data.value) or 0, data.operand)
 		end
 		return condition, result
 	end,
@@ -183,9 +183,9 @@ techage.icta_register_condition("state", {
 			default = "stopped",
 		},
 		{
-			type = "label", 
-			name = "lbl", 
-			label = "Read the state of a TA3/TA4 machine.\n", 
+			type = "label",
+			name = "lbl",
+			label = "Read the state of a TA3/TA4 machine.\n",
 		},
 	},
 	button = function(data, environ)  -- default button label
@@ -196,7 +196,7 @@ techage.icta_register_condition("state", {
 			return techage.send_single(environ.number, data.number, "state")
 		end
 		local result = function(val)
-			return techage.compare(val, data.value, data.operand)
+			return techage.compare(val, tonumber(data.value) or 0, data.operand)
 		end
 		return condition, result
 	end,
@@ -225,12 +225,12 @@ techage.icta_register_condition("fuel", {
 			default = ""
 		},
 		{
-			type = "label", 
-			name = "lbl", 
-			label = "Read and evaluate the fuel value\nof a fuel consuming block.", 
+			type = "label",
+			name = "lbl",
+			label = "Read and evaluate the fuel value\nof a fuel consuming block.",
 		},
 	},
-	button = function(data, environ) 
+	button = function(data, environ)
 		return 'fuel('..techage.fmt_number(data.number)..","..data.operand..' '..data.value..')'
 	end,
 	code = function(data, environ)
@@ -238,7 +238,7 @@ techage.icta_register_condition("fuel", {
 			return techage.send_single(environ.number, data.number, "fuel")
 		end
 		local result = function(val)
-			return techage.compare(val, tonumber(data.value), data.operand)
+			return techage.compare(val, tonumber(data.value) or 0, data.operand)
 		end
 		return condition, result
 	end,
@@ -267,12 +267,12 @@ techage.icta_register_condition("load", {
 			default = ""
 		},
 		{
-			type = "label", 
-			name = "lbl", 
-			label = "Read and evaluate the load (0..100)\nof a tank/storage block.", 
+			type = "label",
+			name = "lbl",
+			label = "Read and evaluate the load (0..100)\nof a tank/storage block.",
 		},
 	},
-	button = function(data, environ) 
+	button = function(data, environ)
 		return 'load('..techage.fmt_number(data.number)..","..data.operand..' '..data.value..')'
 	end,
 	code = function(data, environ)
@@ -280,7 +280,7 @@ techage.icta_register_condition("load", {
 			return techage.send_single(environ.number, data.number, "load")
 		end
 		local result = function(val)
-			return techage.compare(val, tonumber(data.value), data.operand)
+			return techage.compare(val, tonumber(data.value) or 0, data.operand)
 		end
 		return condition, result
 	end,
@@ -309,12 +309,12 @@ techage.icta_register_condition("depth", {
 			default = ""
 		},
 		{
-			type = "label", 
-			name = "lbl", 
-			label = "Read and evaluate the current\ndepth of a quarry block.", 
+			type = "label",
+			name = "lbl",
+			label = "Read and evaluate the current\ndepth of a quarry block.",
 		},
 	},
-	button = function(data, environ) 
+	button = function(data, environ)
 		return 'depth('..techage.fmt_number(data.number)..","..data.operand..' '..data.value..')'
 	end,
 	code = function(data, environ)
@@ -322,7 +322,7 @@ techage.icta_register_condition("depth", {
 			return techage.send_single(environ.number, data.number, "depth")
 		end
 		local result = function(val)
-			return techage.compare(val, tonumber(data.value), data.operand)
+			return techage.compare(val, tonumber(data.value) or 0, data.operand)
 		end
 		return condition, result
 	end,
@@ -351,12 +351,12 @@ techage.icta_register_condition("delivered", {
 			default = ""
 		},
 		{
-			type = "label", 
-			name = "lbl", 
-			label = "Read and evaluate the delivered\npower of a generator block.\nPower consuming blocks like accus\ncould also provide a negative value.", 
+			type = "label",
+			name = "lbl",
+			label = "Read and evaluate the delivered\npower of a generator block.\nPower consuming blocks like accus\ncould also provide a negative value.",
 		},
 	},
-	button = function(data, environ) 
+	button = function(data, environ)
 		return 'deliv('..techage.fmt_number(data.number)..","..data.operand..' '..data.value..')'
 	end,
 	code = function(data, environ)
@@ -364,7 +364,7 @@ techage.icta_register_condition("delivered", {
 			return techage.send_single(environ.number, data.number, "delivered")
 		end
 		local result = function(val)
-			return techage.compare(val, tonumber(data.value), data.operand)
+			return techage.compare(val, tonumber(data.value) or 0, data.operand)
 		end
 		return condition, result
 	end,
@@ -394,10 +394,10 @@ techage.icta_register_condition("chest", {
 			default = "empty",
 		},
 		{
-			type = "label", 
-			name = "lbl", 
+			type = "label",
+			name = "lbl",
 			label = "Read the state from a Techage chest\n"..
-				"and other similar blocks.", 
+				"and other similar blocks.",
 		},
 	},
 	button = function(data, environ)  -- default button label
@@ -408,7 +408,7 @@ techage.icta_register_condition("chest", {
 			return techage.send_single(environ.number, data.number, "state")
 		end
 		local result = function(val)
-			return techage.compare(val, data.value, data.operand)
+			return techage.compare(val, tonumber(data.value) or 0, data.operand)
 		end
 		return condition, result
 	end,
@@ -436,9 +436,9 @@ techage.icta_register_condition("signaltower", {
 			default = "off",
 		},
 		{
-			type = "label", 
-			name = "lbl", 
-			label = "Read the color state\nof a Signal Tower.", 
+			type = "label",
+			name = "lbl",
+			label = "Read the color state\nof a Signal Tower.",
 		},
 	},
 	button = function(data, environ)  -- default button label
@@ -449,35 +449,35 @@ techage.icta_register_condition("signaltower", {
 			return techage.send_single(environ.number, data.number, "state")
 		end
 		local result = function(val)
-			return techage.compare(val, data.value, data.operand)
+			return techage.compare(val, tonumber(data.value) or 0, data.operand)
 		end
 		return condition, result
 	end,
 })
 
 techage.icta_register_action("signaltower", {
-	title = "send Signal Tower command",
+	title = "TA4 Signal Tower",
 	formspec = {
 		{
-			type = "numbers", 
-			name = "number", 
-			label = "Signal Tower number", 
+			type = "numbers",
+			name = "number",
+			label = "Signal Tower number",
 			default = "",
 		},
 		{
-			type = "textlist", 
+			type = "textlist",
 			name = "value",
-			label = "lamp color",      
-			choices = "off,green,amber,red", 
+			label = "lamp color",
+			choices = "off,green,amber,red",
 			default = "red",
 		},
 		{
-			type = "label", 
-			name = "lbl", 
-			label = "Turn on/off a Signal Tower lamp.", 
+			type = "label",
+			name = "lbl",
+			label = "Turn on/off a Signal Tower lamp.",
 		},
 	},
-	button = function(data, environ) 
+	button = function(data, environ)
 		return 'tower('..techage.fmt_number(data.number)..","..data.value..')'
 	end,
 	code = function(data, environ)
@@ -487,29 +487,68 @@ techage.icta_register_action("signaltower", {
 	end,
 })
 
+techage.icta_register_action("signallamp", {
+	title = "TA4 Signal Lamp",
+	formspec = {
+		{
+			type = "numbers",
+			name = "number",
+			label = "Signal Tower number",
+			default = "",
+		},
+		{
+			type = "textlist",
+			name = "payload",
+			label = "lamp number",
+			choices = "1,2,3,4",
+			default = "1",
+		},
+		{
+			type = "textlist",
+			name = "value",
+			label = "lamp color",
+			choices = "off,green,amber,red",
+			default = "red",
+		},
+		{
+			type = "label",
+			name = "lbl",
+			label = "Turn on/off a Signal Tower lamp.",
+		},
+	},
+	button = function(data, environ)
+		return 'tower('..techage.fmt_number(data.number)..","..data.payload..","..data.value..')'
+	end,
+	code = function(data, environ)
+		return function(env, output, idx)
+			techage.send_multi(environ.number, data.number, data.value, tonumber(data.payload))
+		end
+	end,
+})
+
 techage.icta_register_action("switch", {
 	title = "turn block on/off",
 	formspec = {
 		{
-			type = "numbers", 
-			name = "number", 
-			label = "block number(s)", 
+			type = "numbers",
+			name = "number",
+			label = "block number(s)",
 			default = "",
 		},
 		{
-			type = "textlist", 
+			type = "textlist",
 			name = "value",
-			label = "state",      
-			choices = "on,off", 
+			label = "state",
+			choices = "on,off",
 			default = "on",
 		},
 		{
-			type = "label", 
-			name = "lbl", 
-			label = "Used for lamps, machines, gates,...", 
+			type = "label",
+			name = "lbl",
+			label = "Used for lamps, machines, gates,...",
 		},
 	},
-	button = function(data, environ) 
+	button = function(data, environ)
 		return 'turn('..techage.fmt_number(data.number)..","..data.value..')'
 	end,
 	code = function(data, environ)
@@ -523,28 +562,28 @@ techage.icta_register_action("display", {
 	title = "Display: overwrite one line",
 	formspec = {
 		{
-			type = "numbers", 
-			name = "number", 
-			label = "Display number", 
+			type = "numbers",
+			name = "number",
+			label = "Display number",
 			default = "",
 		},
 		{
-			type = "textlist", 
-			name = "row", 
-			label = "Display line", 
-			choices = "1,2,3,4,5", 
+			type = "textlist",
+			name = "row",
+			label = "Display line",
+			choices = "1,2,3,4,5",
 			default = "1",
 		},
 		{
-			type = "ascii", 
+			type = "ascii",
 			name = "text",
-			label = "text",      
+			label = "text",
 			default = "",
 		},
 		{
-			type = "label", 
-			name = "lbl", 
-			label = "Use a '*' character as reference\nto any condition result", 
+			type = "label",
+			name = "lbl",
+			label = "Use a '*' character as reference\nto any condition result",
 		},
 	},
 	code = function(data, environ)
@@ -556,7 +595,7 @@ techage.icta_register_action("display", {
 			techage.send_multi(environ.number, data.number, "set", payload)
 		end
 	end,
-	button = function(data, environ) 
+	button = function(data, environ)
 		return "lcd("..techage.fmt_number(data.number)..","..data.row..',"'..data.text..'")'
 	end,
 })
@@ -565,9 +604,9 @@ techage.icta_register_action("cleardisplay", {
 	title = "Display: Clear screen",
 	formspec = {
 		{
-			type = "number", 
-			name = "number", 
-			label = "Display number", 
+			type = "number",
+			name = "number",
+			label = "Display number",
 			default = "",
 		},
 	},
@@ -576,7 +615,7 @@ techage.icta_register_action("cleardisplay", {
 			techage.send_multi(environ.number, data.number, "clear")
 		end
 	end,
-	button = function(data, environ) 
+	button = function(data, environ)
 		return "clear lcd("..techage.fmt_number(data.number)..")"
 	end,
 })
@@ -585,15 +624,15 @@ techage.icta_register_action("chat", {
 	title = "send chat message",
 	formspec = {
 		{
-			type = "ascii", 
+			type = "ascii",
 			name = "text",
-			label = "message",      
+			label = "message",
 			default = "",
 		},
 		{
-			type = "label", 
-			name = "lbl", 
-			label = "The chat message is send to the\nController owner, only.", 
+			type = "label",
+			name = "lbl",
+			label = "The chat message is send to the\nController owner, only.",
 		},
 	},
 	code = function(data, environ)
@@ -601,7 +640,7 @@ techage.icta_register_action("chat", {
 			minetest.chat_send_player(environ.owner, "[TA4 ICTA Controller] "..data.text)
 		end
 	end,
-	button = function(data, environ) 
+	button = function(data, environ)
 		return 'chat("'..data.text:sub(1,12)..'")'
 	end,
 })
@@ -628,23 +667,23 @@ techage.icta_register_action("door", {
 	title = "open/close door",
 	formspec = {
 		{
-			type = "digits", 
-			name = "pos", 
-			label = "door position like: 123,7,-1200", 
+			type = "digits",
+			name = "pos",
+			label = "door position like: 123,7,-1200",
 			default = "",
 		},
 		{
-			type = "textlist", 
+			type = "textlist",
 			name = "door_state",
-			label = "door state",      
-			choices = "open,close", 
+			label = "door state",
+			choices = "open,close",
 			default = "open",
 		},
 		{
-			type = "label", 
-			name = "lbl", 
+			type = "label",
+			name = "lbl",
 			label = "For standard doors like the Steel Doors.\n"..
-				"Use the Techage Info Tool to\neasily determine a door position.", 
+				"Use the Techage Info Tool to\neasily determine a door position.",
 		},
 	},
 	code = function(data, environ)
@@ -652,8 +691,100 @@ techage.icta_register_action("door", {
 			techage.icta_door_toggle(data.pos, environ.owner, data.door_state)
 		end
 	end,
-	button = function(data, environ) 
+	button = function(data, environ)
 		return 'door("'..data.pos..'",'..data.door_state..")"
+	end,
+})
+
+techage.icta_register_action("move", {
+	title = "TA4 Move Controller",
+	formspec = {
+		{
+			type = "number",
+			name = "number",
+			label = "block number",
+			default = "",
+		},
+		{
+			type = "textlist",
+			name = "cmnd",
+			label = "command",
+			choices = "a2b,b2a,move",
+			default = "a2b",
+		},
+	},
+	button = function(data, environ)  -- default button label
+		return 'move('..techage.fmt_number(data.number)..","..data.cmnd..')'
+	end,
+	code = function(data, environ)
+		return function(env, output, idx)
+			return techage.send_single(environ.number, data.number, data.cmnd)
+		end
+	end,
+})
+
+techage.icta_register_action("turn", {
+	title = "TA4 Turn Controller",
+	formspec = {
+		{
+			type = "number",
+			name = "number",
+			label = "block number",
+			default = "",
+		},
+		{
+			type = "textlist",
+			name = "cmnd",
+			label = "command",
+			choices = "left,right,uturn",
+			default = "left",
+		},
+	},
+	button = function(data, environ)  -- default button label
+		return 'move('..techage.fmt_number(data.number)..","..data.cmnd..')'
+	end,
+	code = function(data, environ)
+		return function(env, output, idx)
+			return techage.send_single(environ.number, data.number, data.cmnd)
+		end
+	end,
+})
+
+techage.icta_register_action("goto", {
+	title = "TA4 Sequencer",
+	formspec = {
+		{
+			type = "number",
+			name = "number",
+			label = "block number",
+			default = "",
+		},
+		{
+			type = "textlist",
+			name = "cmnd",
+			label = "command",
+			choices = "goto,stop",
+			default = "left",
+		},
+		{
+			type = "number",
+			name = "slot",
+			label = "time slot",
+			default = "1",
+		},
+		{
+			type = "label",
+			name = "lbl",
+			label = "The 'stop' command needs no time slot.",
+		},
+	},
+	button = function(data, environ)  -- default button label
+		return data.cmnd..'('..techage.fmt_number(data.number)..","..data.slot..')'
+	end,
+	code = function(data, environ)
+		return function(env, output, idx)
+			return techage.send_single(environ.number, data.number, data.cmnd, tonumber(data.slot or "1") or 1)
+		end
 	end,
 })
 
@@ -685,12 +816,12 @@ techage.icta_register_condition("playerdetector", {
 			default = "",
 		},
 		{
-			type = "label", 
-			name = "lbl", 
-			label = "Read and check the name\nof a Player Detector.\nUse a '*' character for all player names.\n Use a '-' character for no player.", 
+			type = "label",
+			name = "lbl",
+			label = "Read and check the name\nof a Player Detector.\nUse a '*' character for all player names.\n Use a '-' character for no player.",
 		},
 	},
-	
+
 	code = function(data, environ)
 		local condition = function(env, idx)
 			return techage.icta_player_detect(environ.number, data.number, data.name)
@@ -700,7 +831,7 @@ techage.icta_register_condition("playerdetector", {
 		end
 		return condition, result
 	end,
-	button = function(data, environ) 
+	button = function(data, environ)
 		return "detector("..techage.fmt_number(data.number)..","..data.name:sub(1,8)..")"
 	end,
 })
@@ -709,32 +840,32 @@ techage.icta_register_action("set_filter", {
 	title = "turn Distributor filter on/off",
 	formspec = {
 		{
-			type = "number", 
-			name = "number", 
-			label = "distri number", 
+			type = "number",
+			name = "number",
+			label = "distri number",
 			default = "",
 		},
 		{
-			type = "textlist", 
+			type = "textlist",
 			name = "color",
-			label = "filter port",      
-			choices = "red,green,blue,yellow", 
+			label = "filter port",
+			choices = "red,green,blue,yellow",
 			default = "red",
 		},
 		{
-			type = "textlist", 
+			type = "textlist",
 			name = "value",
-			label = "state",      
-			choices = "on,off", 
+			label = "state",
+			choices = "on,off",
 			default = "on",
 		},
 		{
-			type = "label", 
-			name = "lbl", 
-			label = "turn Distributor filter port on/off\n", 
+			type = "label",
+			name = "lbl",
+			label = "turn Distributor filter port on/off\n",
 		},
 	},
-	button = function(data, environ) 
+	button = function(data, environ)
 		return 'turn('..techage.fmt_number(data.number)..","..data.color..","..data.value..')'
 	end,
 	code = function(data, environ)
@@ -788,7 +919,7 @@ techage.icta_register_condition("get_filter", {
 			return techage.send_single(environ.number, data.number, "port", data.color)
 		end
 		local result = function(val)
-			return techage.compare(val, data.value, data.operand)
+			return techage.compare(val, tonumber(data.value) or 0, data.operand)
 		end
 		return condition, result
 	end,
@@ -798,24 +929,24 @@ techage.icta_register_action("exchange", {
 	title = "place/remove a block via the Door Controller II",
 	formspec = {
 		{
-			type = "number", 
-			name = "number", 
-			label = "number", 
+			type = "number",
+			name = "number",
+			label = "number",
 			default = "",
 		},
 		{
-			type = "number", 
-			name = "slot", 
-			label = "slot no", 
+			type = "number",
+			name = "slot",
+			label = "slot no",
 			default = "1",
 		},
 		{
-			type = "label", 
-			name = "lbl", 
-			label = "place/remove a block via\nthe Door Controller II\n", 
+			type = "label",
+			name = "lbl",
+			label = "place/remove a block via\nthe Door Controller II\n",
 		},
 	},
-	button = function(data, environ) 
+	button = function(data, environ)
 		return 'exch('..techage.fmt_number(data.number)..","..data.slot..')'
 	end,
 	code = function(data, environ)
@@ -825,4 +956,3 @@ techage.icta_register_action("exchange", {
 		end
 	end,
 })
-

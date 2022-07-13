@@ -3,11 +3,11 @@
 	TechAge
 	=======
 
-	Copyright (C) 2019-2021 Joachim Stolberg
+	Copyright (C) 2019-2022 Joachim Stolberg
 
 	AGPL v3
 	See LICENSE.txt for more information
-	
+
 	TA3 Industrial Furnace Firebox
 
 ]]--
@@ -72,7 +72,7 @@ end
 
 local function booster_cmnd(pos, cmnd)
 	return techage.transfer(
-		pos, 
+		pos,
 		"L",  -- outdir
 		cmnd,  -- topic
 		nil,  -- payload
@@ -102,7 +102,7 @@ minetest.register_node("techage:furnace_firebox", {
 	on_punch = fuel.on_punch,
 	on_receive_fields = fuel.on_receive_fields,
 	on_rightclick = fuel.on_rightclick,
-	
+
 	on_construct = function(pos)
 		local nvm = techage.get_nvm(pos)
 		techage.add_node(pos, "techage:furnace_firebox")
@@ -145,7 +145,7 @@ minetest.register_node("techage:furnace_firebox_on", {
 	is_ground_content = false,
 	sounds = default.node_sound_stone_defaults(),
 	drop = "techage:furnace_firebox",
-	
+
 	on_timer = node_timer,
 	can_dig = fuel.can_dig,
 	on_receive_fields = fuel.on_receive_fields,
@@ -173,6 +173,18 @@ techage.register_node({"techage:furnace_firebox", "techage:furnace_firebox_on"},
 			return "unsupported"
 		end
 	end,
+	on_beduino_request_data = function(pos, src, topic, payload)
+		local nvm = techage.get_nvm(pos)
+		if topic == 128 then
+			return 0, techage.get_node_lvm(pos).name
+		elseif topic == 129 then  -- State
+			return 0, {nvm.running and techage.RUNNING or techage.STOPPED}
+		elseif topic == 132 then  -- Fuel Level
+			return 0, {fuel.get_fuel_amount(nvm)}
+		else
+			return 2, ""
+		end
+	end,
 	-- called from furnace_top
 	on_transfer = function(pos, in_dir, topic, payload)
 		local nvm = techage.get_nvm(pos)
@@ -197,9 +209,9 @@ techage.register_node({"techage:furnace_firebox", "techage:furnace_firebox_on"},
 			nvm.liquid.amount = (nvm.liquid.amount or 0) + count
 			nvm.liquid.name = "techage:gasoline"
 			inv:set_stack("fuel", 1, nil)
-		end	
+		end
 	end,
-})	
+})
 
 liquid.register_nodes({"techage:furnace_firebox", "techage:furnace_firebox_on"},
 	Pipe, "tank", nil, fuel.get_liquid_table(fuel.BT_OIL, fuel.CAPACITY, start_firebox))

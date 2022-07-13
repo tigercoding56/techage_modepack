@@ -7,7 +7,7 @@
 
 	AGPL v3
 	See LICENSE.txt for more information
-	
+
 	Constructioon Plans for TA machines
 
 ]]--
@@ -24,9 +24,12 @@ local IMG41 = {"", "techage_ta4_tes.png"}
 local IMG42 = {"", "techage_ta4_solar.png"}
 local IMG43 = {"", "techage_reactor_inv.png"}
 local IMG44 = {"", "techage_ta4_filter.png"}
+local IMG45 = {"10x10", "techage_collider_plan.png"}
+local IMG46 = {"5x4", "techage_fusion_reactor.png"}
 
 local TOP_V = {"top_view", ""}
 local SIDEV = {"side_view", ""}
+local SECTV = {"sectional_view", ""}
 
 --
 -- TA1: Coal Pile
@@ -161,8 +164,8 @@ techage.ConstructionPlans["steamengine"] = {
 	{false, BOIL2, false, PI090, false, false, false},
 	{false, BOIL1, false, PI090, false, false, false},
 	{false, FIBOX, false, PK090, CYLIN, FLYWH, false},
-} 
-		
+}
+
 --
 -- TA2 Storage
 --
@@ -184,7 +187,7 @@ techage.ConstructionPlans["ta2_storage"] = {
 	{false, false, false, AXL90, WCHST, false, false},
 	{false, false, false, AXL90, false, false, false},
 	{AXL00, AXL00, AXL00, GRBOX, false, false, false},
-} 
+}
 
 --
 -- Item Transport
@@ -200,7 +203,7 @@ techage.ConstructionPlans["itemtransport"] = {
 	{false},
 	{false},
 	{CHEST, PUSHR, TB000, GRIND, PUSHR, DISTR, TB000, SIEV2, PUSHR, TB000, CHEST},
-} 
+}
 
 --
 -- Gravel Rinser
@@ -214,7 +217,7 @@ local TK090 = {"techage_tube_knee.png^[transformR90", "techage:tubeS"} -- '7'
 local TK180 = {"techage_tube_knee.png^[transformR180", "techage:tubeS"}
 local TK270 = {"techage_tube_knee.png^[transformR270", "techage:tubeS"}
 
-techage.ConstructionPlans["gravelrinser"] = {	
+techage.ConstructionPlans["gravelrinser"] = {
 	{false, false, false, SIDEV, false, false, false, false},
 	{false, GLASS, WATER, GLASS, GLASS, GLASS, GLASS, GLASS},
 	{false, DDIRT, DDIRT, TK000, RINSR, TK270, HOPPR, CHEST},
@@ -289,8 +292,8 @@ techage.ConstructionPlans["ta3_tank"] = {
 --
 -- TA3 Oil Loading station
 --
-local MCART = {minetest.inventorycube("carts_cart_top.png", 
-		"carts_cart_side.png^minecart_logo.png", "carts_cart_side.png^minecart_logo.png"), 
+local MCART = {minetest.inventorycube("carts_cart_top.png",
+		"carts_cart_side.png^minecart_logo.png", "carts_cart_side.png^minecart_logo.png"),
 		"minecart:cart"}
 local PRAIL = {"carts_rail_straight_pwr.png", "carts:powerrail"}
 local PRAIH = {"carts_rail_straight_pwr.png^[transformR90", "carts:powerrail"}
@@ -461,6 +464,100 @@ techage.ConstructionPlans["ta4_liquid_filter_top"] = {
 	{false, CONCR, false, false, false, CONCR},
 	{false, CONCR, CONCR, CONCR, CONCR, CONCR},
 }
+
+--
+-- TA4 Collider
+--
+local STEEL = {"default_steel_block.png", "techage:ta4_colliderblock"}
+local COOL4 = {"techage_filling_ta4.png^techage_frame_ta4.png^techage_cooler.png", "techage:ta4_collider_cooler"}
+
+techage.ConstructionPlans["techage_collider_plan"] = {
+	{IMG45, false, false, false},
+	{false, false, false, false},
+	{false, false, false, false},
+	{false, false, false, false},
+	{false, false, false, false},
+	{false, false, false, false},
+}
+
+--
+-- TA4 Detector Cooler
+--
+local STEEL = {"default_steel_block.png", "techage:ta4_colliderblock"}
+local COOL4 = {"techage_filling_ta4.png^techage_frame_ta4.png^techage_cooler.png", "techage:ta4_collider_cooler"}
+
+techage.ConstructionPlans["ta4_cooler"] = {
+	{false, false, false, SIDEV, false, false, false, false, false},
+	{false, false, false, false, false, false, false, false, false},
+	{false, STEEL, PIPEH, HEXR1, PIPEH, COOL4, PN270, false, false},
+	{false, STEEL, false, HEXR2, false, false, PIPEV, false, false},
+	{false, STEEL, PIPEH, HEXR3, PIPEH, PIPEH, PN180, false, false},
+	{false, false, false, false, false, false, false, false, false},
+}
+
+--
+-- TA5 Teleport Blocks
+--
+local TELEP = {"techage_filling_ta4.png^techage_frame_ta5.png^techage_appl_teleport.png", "techage:ta5_tele_pipe"}
+local TELET = {"techage_filling_ta4.png^techage_frame_ta5.png^techage_appl_teleport.png", "techage:ta5_tele_tube"}
+local PUMP4 = {"techage_filling_ta4.png^techage_appl_pump.png^techage_frame_ta4.png", "techage:t4_pump"}
+local ARROW = {"techage_form_arrow.png"}
+
+techage.ConstructionPlans["ta5_teleport"] = {
+	{false, false, false, false, false, false, false, false, false, false, false},
+	{false, CHEST, PushR, TELET, false, ARROW, false, TELET, Tubes, CHEST, false},
+	{false, false, false, false, false, false, false, false, false, false, false},
+	{false, CHEST, Tubes, TELET, false, ARROW, false, TELET, PushR, CHEST, false},
+	{false, false, false, false, false, false, false, false, false, false, false},
+	{false, false, false, false, false, false, false, false, false, false, false},
+	{false, TANK4, PUMP4, TELEP, false, ARROW, false, TELEP, PIPEH, TANK4, false},
+}
+
+--
+-- TA5 Fusion Reactor
+--
+local SHELL = {"techage_reactor_shell.png", "techage:ta5_fr_shell"}
+local NUCLS = {"techage_reactor_shell.png^techage_collider_detector_core.png", "techage:ta5_fr_nucleus"}
+local MAGN1 = {"techage_collider_magnet.png^techage_steel_tiles_top3.png", "techage:ta5_magnet1"}
+local MAGN2 = {"techage_collider_magnet.png^techage_steel_tiles_top3.png^[transformR90]", "techage:ta5_magnet1"}
+local MAGN3 = {"techage_collider_magnet.png^techage_steel_tiles_top3.png^[transformR180]", "techage:ta5_magnet1"}
+local MAGN4 = {"techage_collider_magnet.png^techage_steel_tiles_top3.png^[transformR270]", "techage:ta5_magnet1"}
+
+techage.ConstructionPlans["ta5_fusion_reactor"] = {
+	{false, false, false, false, false, false, IMG46, false, false, false, false},
+	{false, false, false, false, false, false, false, false, false, false, false},
+	{false, false, false, false, false, false, false, false, false, false, false},
+	{false, false, false, false, false, false, false, false, false, false, false},
+	{false, SECTV, false, false, false, false, false, false, false, false, false},
+	{false, false, SHELL, SHELL, SHELL, false, SHELL, SHELL, SHELL, false, false},
+	{false, SHELL, SHELL, MAGN3, SHELL, SHELL, SHELL, MAGN3, SHELL, SHELL, false},
+	{false, SHELL, MAGN4, false, MAGN2, NUCLS, MAGN4, false, MAGN2, SHELL, false},
+	{false, SHELL, SHELL, MAGN1, SHELL, SHELL, SHELL, MAGN1, SHELL, SHELL, false},
+	{false, false, SHELL, SHELL, SHELL, false, SHELL, SHELL, SHELL, false, false},
+}
+
+--
+-- TA5 Heat Exchanger
+--
+local PIPEG = {"techage_ta5_gaspipe.png", "techage:ta5_pipe1S"}
+local PIPEB = {"techage_ta5_gaspipeB.png", "techage:ta5_pipe2S"}
+local HEX51 = {"techage_filling_ta4.png^techage_frameT_ta5.png^techage_appl_ribsT.png", "techage:ta5_heatexchanger3"}
+local HEX52 = {"techage_filling_ta4.png^techage_frameM_ta4.png^techage_appl_ribsB.png", "techage:ta5_heatexchanger2"}
+local HEX53 = {"techage_filling_ta4.png^techage_frameB_ta4.png^techage_appl_hole_electric.png", "techage:ta5_heatexchanger1"}
+local TURB5 = {"techage_filling_ta4.png^techage_appl_turbine.png^techage_frame_ta5.png", "techage:ta5_turbine"}
+local GENE5 = {"techage_filling_ta4.png^techage_frame_ta5.png^techage_appl_generator.png^[transformFX]", "techage:ta5_generator"}
+
+techage.ConstructionPlans["ta5_heatexchanger"] = {
+	{false, false, false, false, SIDEV, false, false, false},
+	{false, false, false, false, false, false, false, false},
+	{false, false, false, false, false, false, false, false},
+	{false, false, PIPEG, PIPEG, HEX51, PIPEH, PN270, false},
+	{false, false, false, false, HEX52, false, PIPEV, false},
+	{false, false, PIPEB, PIPEB, HEX53, PIPEH, TURB5, GENE5},
+	{false, false, false, false, false, false, false, false},
+	{false, false, false, false, false, false, false, false},
+}
+
 
 function techage.add_manual_plans(table_with_plans)
 	for name, tbl in pairs(table_with_plans) do

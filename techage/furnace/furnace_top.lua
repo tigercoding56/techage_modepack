@@ -3,11 +3,11 @@
 	TechAge
 	=======
 
-	Copyright (C) 2019-2020 Joachim Stolberg
+	Copyright (C) 2019-2022 Joachim Stolberg
 
 	AGPL v3
 	See LICENSE.txt for more information
-	
+
 	TA3 Industrial Furnace Top
 
 ]]--
@@ -54,12 +54,12 @@ local function formspec(self, pos, nvm)
 		"tooltip[2,2;1,1;"..self:get_state_tooltip(nvm).."]"..
 
 		"list[context;dst;3,0;2,2;]"..
-		
+
 		"label[6,0;"..S("Outp")..": "..idx.."/"..num.."]"..
 		"item_image_button[6.5,0.5;1,1;"..outp..";b1;]"..
 		"button[6,1.5;1,1;priv;<<]"..
 		"button[7,1.5;1,1;next;>>]"..
-		
+
 		"list[current_player;main;0,3.5;8,4;]" ..
 		"listring[current_player;main]"..
 		"listring[context;src]" ..
@@ -76,7 +76,7 @@ end
 
 local function firebox_cmnd(pos, cmnd)
 	return techage.transfer(
-		{x=pos.x, y=pos.y-1, z=pos.z}, 
+		{x=pos.x, y=pos.y-1, z=pos.z},
 		nil,  -- outdir
 		cmnd,  -- topic
 		nil,  -- payload
@@ -120,7 +120,7 @@ local function keep_running(pos, elapsed)
 	if nvm.toggle then -- progress bar/arrow
 		M(pos):set_string("formspec", formspec(crd.State, pos, nvm))
 	end
-end	
+end
 
 local function allow_metadata_inventory_put(pos, listname, index, stack, player)
 	if minetest.is_protected(pos, player:get_player_name()) then
@@ -257,9 +257,20 @@ local tubing = {
 			return CRD(pos).State:on_receive_message(pos, topic, payload)
 		end
 	end,
+	on_beduino_receive_cmnd = function(pos, src, topic, payload)
+		return CRD(pos).State:on_beduino_receive_cmnd(pos, topic, payload)
+	end,
+	on_beduino_request_data = function(pos, src, topic, payload)
+		if topic == 141 then  -- Furnace Output
+			local nvm = techage.get_nvm(pos)
+			return 0, string.split(nvm.output or "unknown", " ")[1]
+		else
+			return CRD(pos).State:on_beduino_request_data(pos, topic, payload)
+		end
+	end,
 }
 
-local _, node_name_ta3, _ = 
+local _, node_name_ta3, _ =
 	techage.register_consumer("furnace", S("Furnace Top"), tiles, {
 		drawtype = "normal",
 		cycle_time = CYCLE_TIME,
@@ -298,4 +309,3 @@ minetest.register_craft({
 		{"", "techage:vacuum_tube", ""},
 	},
 })
-

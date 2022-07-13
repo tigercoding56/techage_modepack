@@ -144,7 +144,7 @@ minetest.register_entity("minecart:marker", {
 	initial_properties = {
 		visual = "upright_sprite",   
 		textures = {"minecart_marker_cube.png"},
-		use_texture_alpha = true,     
+		use_texture_alpha = minecart.CLIP,
 		physical = false,
 		glow = 12,
 		static_save = false,
@@ -196,23 +196,27 @@ function minecart.is_owner(player, owner)
 end
 
 function minecart.get_buffer_pos(pos, player_name)
-	local pos1 = minecart.find_node_near_lvm(pos, 1, {"minecart:buffer"})
-	if pos1 then
-		local meta = minetest.get_meta(pos1)
-		if player_name == nil or player_name == meta:get_string("owner") then
-			return pos1
+	if pos then
+		local pos1 = minecart.find_node_near_lvm(pos, 1, {"minecart:buffer"})
+		if pos1 then
+			local meta = minetest.get_meta(pos1)
+			if player_name == nil or player_name == meta:get_string("owner") then
+				return pos1
+			end
 		end
 	end
 end
 
 function minecart.get_buffer_name(pos)
-	local pos1 = minecart.find_node_near_lvm(pos, 1, {"minecart:buffer"})
-	if pos1 then
-		local name = M(pos1):get_string("name")
-		if name ~= "" then
-			return name
+	if pos then
+		local pos1 = minecart.find_node_near_lvm(pos, 1, {"minecart:buffer"})
+		if pos1 then
+			local name = M(pos1):get_string("name")
+			if name ~= "" then
+				return name
+			end
+			return P2S(pos1)
 		end
-		return P2S(pos1)
 	end
 end
 
@@ -256,9 +260,11 @@ function minecart.add_nodecart(pos, node_name, param2, cargo, owner, userID)
 		if not minecart.is_rail(pos) then
 			pos2 = minetest.find_node_near(pos, 1, minecart.lRails)
 			if not pos2 or not minecart.is_rail(pos2) then
-				pos2 = minetest.find_node_near(pos, 2, minecart.lRails)
-				if not pos2 or not minecart.is_rail(pos2) then
-					pos2 = minetest.find_node_near(pos, 2, {"air"})
+				-- If no rail is around, use an available cart as new search center
+				pos2 = minetest.find_node_near(pos, 1, minecart.lRailsExt)
+				-- ...and search again.
+				if pos2 then
+					pos2 = minetest.find_node_near(pos2, 1, minecart.lRails)
 				end
 			end
 		else
@@ -282,8 +288,6 @@ function minecart.add_nodecart(pos, node_name, param2, cargo, owner, userID)
 				ndef.after_place_node(pos2)
 			end
 			return pos2
-		else
-			minetest.add_item(pos, ItemStack({name = node_name}))
 		end
 	end
 end
@@ -363,9 +367,13 @@ function minecart.entity_to_node(pos, entity)
 	local dir = minetest.yaw_to_dir(rot.y)
 	local facedir = minetest.dir_to_facedir(dir)
 	minecart.stop_recording(entity, pos)
-	entity.object:remove()
 	local pos2 = minecart.add_nodecart(pos, entity.node_name, facedir, entity.cargo, entity.owner, entity.userID)
-	minecart.stop_monitoring(entity.owner, entity.userID, pos2)
+	if pos2 then
+		minecart.stop_monitoring(entity.owner, entity.userID, pos2)
+		entity.object:remove()
+	else
+		minecart.start_entitycart(entity, pos, facedir)
+	end
 end
 
 function minecart.add_node_to_player_inventory(pos, player, node_name)
@@ -388,9 +396,10 @@ function minecart.remove_entity(self, pos, player)
 		minetest.sound_stop(self.sound_handle)
 		self.sound_handle = nil
 	end
-	minecart.add_node_to_player_inventory(pos, player, self.node_name or "minecart:cart")
+	if player then
+		minecart.add_node_to_player_inventory(pos, player, self.node_name or "minecart:cart")
+	end
 	minecart.stop_monitoring(self.owner, self.userID, pos)
 	minecart.stop_recording(self, pos)	
-	minecart.monitoring_remove_cart(self.owner, self.userID)
 	self.object:remove()
 end

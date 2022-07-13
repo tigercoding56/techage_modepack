@@ -3,7 +3,7 @@
 	TechAge
 	=======
 
-	Copyright (C) 2019-2021 Joachim Stolberg
+	Copyright (C) 2019-2022 Joachim Stolberg
 
 	AGPL v3
 	See LICENSE.txt for more information
@@ -54,18 +54,28 @@ local names = networks.register_junction("techage:concentrator", 2/8, Boxes, Tub
 		local name = "techage:concentrator"..networks.junction_type(pos, Tube, "R", node.param2)
 		minetest.swap_node(pos, {name = name, param2 = node.param2})
 	end,
+	ta_rotate_node = function(pos, node, new_param2)
+		Tube:after_dig_node(pos)
+		minetest.swap_node(pos, {name = node.name, param2 = new_param2})
+		Tube:after_place_node(pos)
+		M(pos):set_int("push_dir", techage.side_to_outdir("R", new_param2))
+	end,
 	after_dig_node = function(pos, oldnode, oldmetadata, digger)
 		Tube:after_dig_node(pos)
 	end,
 }, 27)
 
+for _, name in ipairs(names) do
+	Tube:set_valid_sides(name, {"B", "R", "F", "L", "D", "U"})
+end
+
 techage.register_node(names, {
 	on_push_item = function(pos, in_dir, stack)
 		local push_dir = M(pos):get_int("push_dir")
-		return techage.push_items(pos, push_dir, stack)
+		return techage.safe_push_items(pos, push_dir, stack)
 	end,
 	is_pusher = true,  -- is a pulling/pushing node
-})	
+})
 
 names = networks.register_junction("techage:ta4_concentrator", 2/8, Boxes, Tube, {
 	description = S("TA4 Tube Concentrator"),
@@ -93,18 +103,28 @@ names = networks.register_junction("techage:ta4_concentrator", 2/8, Boxes, Tube,
 		local name = "techage:ta4_concentrator"..networks.junction_type(pos, Tube, "R", node.param2)
 		minetest.swap_node(pos, {name = name, param2 = node.param2})
 	end,
+	ta_rotate_node = function(pos, node, new_param2)
+		Tube:after_dig_node(pos)
+		minetest.swap_node(pos, {name = node.name, param2 = new_param2})
+		Tube:after_place_node(pos)
+		M(pos):set_int("push_dir", techage.side_to_outdir("R", new_param2))
+	end,
 	after_dig_node = function(pos, oldnode, oldmetadata, digger)
 		Tube:after_dig_node(pos)
 	end,
 }, 27)
 
+for _, name in ipairs(names) do
+	Tube:set_valid_sides(name, {"B", "R", "F", "L", "D", "U"})
+end
+
 techage.register_node(names, {
 	on_push_item = function(pos, in_dir, stack)
 		local push_dir = M(pos):get_int("push_dir")
-		return techage.push_items(pos, push_dir, stack)
+		return techage.safe_push_items(pos, push_dir, stack)
 	end,
 	is_pusher = true,  -- is a pulling/pushing node
-})	
+})
 
 
 minetest.register_craft({

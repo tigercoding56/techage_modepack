@@ -3,11 +3,11 @@
 	TechAge
 	=======
 
-	Copyright (C) 2019-2020 Joachim Stolberg
+	Copyright (C) 2019-2022 Joachim Stolberg
 
 	AGPL v3
 	See LICENSE.txt for more information
-	
+
 	Cart Detector/Starter
 
 ]]--
@@ -58,7 +58,7 @@ local function on_receive_fields(pos, formname, fields, player)
 	if minetest.is_protected(pos, player:get_player_name()) then
 		return
 	end
-	
+
 	local meta = minetest.get_meta(pos)
 	if fields.accept then
 		if techage.check_numbers(fields.numbers, player:get_player_name()) then
@@ -151,10 +151,32 @@ techage.register_node({"techage:ta3_cartdetector_off", "techage:ta3_cartdetector
 			return "unsupported"
 		end
 	end,
+	on_beduino_receive_cmnd = function(pos, src, topic, payload)
+		if topic == 1 then
+			local node = minetest.get_node(pos)
+			local dir = minetest.facedir_to_dir(node.param2)
+			minecart.punch_cart(pos, nil, 1.6, dir)
+			return 0
+		else
+			return 2
+		end
+	end,
+	on_beduino_request_data = function(pos, src, topic, payload)
+		if topic == 142 then  -- Binary State
+			local node = techage.get_node_lvm(pos)
+			if node.name == "techage:ta3_cartdetector_on" then
+				return 0, {1}
+			else
+				return 0, {0}
+			end
+		else
+			return 2, ""
+		end
+	end,
 	on_node_load = function(pos)
 		minetest.get_node_timer(pos):start(CYCLE_TIME)
 	end,
-})		
+})
 
 -- Register default cart in addition
 minecart.tEntityNames["carts:cart"] = true

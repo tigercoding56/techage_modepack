@@ -103,12 +103,14 @@ function minecart.start_recording(self, pos)
 	end
 end
 
-function minecart.stop_recording(self, pos)	
+function minecart.stop_recording(self, pos, force_exit)	
 	--print("stop_recording")
 	if self.driver and self.is_recording then
 		local dest_pos = minecart.get_buffer_pos(pos, self.driver)
 		local player = minetest.get_player_by_name(self.driver)
-		if dest_pos and player and #self.checkpoints > 3 then
+		if force_exit then
+			minetest.chat_send_player(self.driver, S("[minecart] Recording canceled!"))
+		elseif dest_pos and player and #self.checkpoints > 3 then
 			-- Remove last checkpoint, because it is potentially too close to the dest_pos
 			table.remove(self.checkpoints) 
 			if self.start_pos then
@@ -123,6 +125,7 @@ function minecart.stop_recording(self, pos)
 				local length = speed * self.runtime
 				local fmt = S("[minecart] Speed = %u m/s, Time = %u s, Route length = %u m")
 				minetest.chat_send_player(self.driver, string.format(fmt, speed, self.runtime, length))
+				minecart.update_buffer_infotext(self.start_pos)
 			end
 		elseif #self.checkpoints <= 3 then
 			minetest.chat_send_player(self.driver, S("[minecart] Your route is too short to record!"))
@@ -163,6 +166,8 @@ function minecart.recording_junctions(self)
 			self.ctrl = {right = true}
 		elseif ctrl.up or ctrl.down then
 			self.ctrl = nil
+		elseif ctrl.jump then
+			return true
 		end
 	end
 	if self.hud_time <= self.timebase then
@@ -186,6 +191,8 @@ function minecart.player_ctrl(self)
 			self.ctrl = {left = true}
 		elseif ctrl.right then
 			self.ctrl = {right = true}
+		elseif ctrl.jump then
+			return true
 		end
 	end
 end

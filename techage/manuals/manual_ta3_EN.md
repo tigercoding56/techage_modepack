@@ -654,16 +654,31 @@ The door controller is used to control the TA3 door/gate blocks. With the door c
 
 The Door Controller II can remove and set all types of blocks. To teach in the Door Controller II, the "Record" button must be pressed. Then all blocks that should be part of the door / gate must be clicked. Then the "Done" button must be pressed. Up to 16 blocks can be selected. The removed blocks are saved in the controller's inventory. The function of the controller can be tested manually using the "Remove" or "Set" buttons. If an `on` /`off` command is sent to the Door Controller II, it removes or sets the blocks as well.
 
-Individual blocks can be set, removed or replaced by other blocks via an `exchange` command. The slot number of the inventory (1 .. 16) must be transferred as payload, i.e.:
+With `$send_cmnd(node_number, "exchange", 2)` individual blocks can be set, removed or replaced by other blocks from the inventory. 
 
-```
-$send_cmnd(node_number, "exchange", 2)
-```
+With `$send_cmnd(node_number, "set", 2)` a block from the inventory can be set explicitly, as long as the inventory slot is not empty.
+
+A block can be removed again with `$send_cmnd(node_number, "dig", 2)` if the inventory slot is empty. 
+
+The name of the set block is returned with `$send_cmnd(node_number, "get", 2)`.
+
+The slot number of the inventory (1 .. 16) must be passed as payload in all three cases.
 
 This can also be used to simulate extendable stairs and the like. 
 
 [ta3_doorcontroller|image]
 
+### TA3 Sound Block
+
+Different sounds can be played with the sound block. All sounds of the Mods Techage, Signs Bot, Hyperloop, Unified Inventory, TA4 Jetpack and Minetest Game are available.
+
+The sounds can be selected and played via the menu and via command.
+
+- Command `on` to play a sound
+- Command `sound <idx>` to select a sound via the index
+- Command `gain <volume>` to adjust the volume via the `<volume>` value (1 to 5). 
+
+[ta3_soundblock|image]
 
 ### TA3 Mesecons Converter
 
@@ -690,6 +705,7 @@ Detectors scan their surroundings and send an `on` command when the search is re
 The detector is a special tube block that detects when items are passed on through the tube. To do this, it must be connected to tubes on both sides. If items are pushed into the detector with a pusher, they are automatically passed on.
 It sends an `on` when an item is recognized, followed by an `off` a second later.
 Then further commands are blocked for 8 seconds.
+The waiting time and the items that should trigger a command can be configured using the open-ended wrench menu. 
 
 
 [ta3_detector|image]
@@ -718,6 +734,12 @@ If the search should be limited to specific players, these player names can also
 
 [ta3_playerdetector|image]
 
+### TA3 Light Detector
+
+The light detector sends an `on` command if the light level of the block above exceeds a certain level, which can be set through the right-click menu.
+If you have a TA4 Lua Controller, you can get the exact light level with $get_cmd(num, 'light_level')
+
+[ta3_lightdetector|image]
 
 ## TA3 Machines
 
@@ -810,13 +832,12 @@ The processing power is up to 8 times one item every 4 seconds.
 
 ### Techage Info Tool
 
-The Techage Info Tool (wrench) has several functions. It shows the time, position, temperature and biome when an unknown block is clicked on.
+The Techage Info Tool (open-ended wrench) has several functions. It shows the time, position, temperature and biome when an unknown block is clicked on.
 If you click on a TechAge block with command interface, all available data will be shown (see also "Logic / switching blocks").
 
 With Shift + right click an extended menu can be opened for some blocks. Depending on the block, further data can be called up or special settings can be made here. In the case of a generator, for example, the charging curve/switch-off can be programmed. 
 
 [ta3_end_wrench|image]
-
 
 ### TechAge Programmer
 
@@ -825,17 +846,25 @@ If you click in the air, the internal memory is deleted.
 
 [ta3_programmer|image]
 
-
-
 ### TechAge Trowel / Trowel
 
 The trowel is used for plastering power cables. See also "TA power cable".
 
 [ta3_trowel|image]
 
-
 ### TA3 drill pipe wrench
 
 This tool can be used to remove the drill pipe blocks if, for example, a tunnel is to pass through there.
 
 [ta3_drill_pipe_wrench|image]
+
+### Techage Screwdriver
+
+The Techage Screwdriver serves as a replacement for the normal screwdriver. It has the following functions:
+
+- Left click: turn the block to the left
+- Right click: turn the visible side of the block upwards
+- Shift + left click: save the alignment of the clicked block
+- Shift + right click: apply the saved alignment to the clicked block
+
+[ta3_screwdriver|image] 

@@ -3,13 +3,13 @@
 	TechAge
 	=======
 
-	Copyright (C) 2019 Joachim Stolberg
+	Copyright (C) 2019-2022 Joachim Stolberg
 
 	AGPL v3
 	See LICENSE.txt for more information
 
 	TA2/TA3/TA4 Distributor
-	
+
 ]]--
 
 -- for lazy programmers
@@ -34,7 +34,8 @@ local INFO = [[Turn port on/off or read its state: command = 'port', payload = r
 
 --local Side2Color = {B="red", L="green", F="blue", R="yellow"}
 local SlotColors = {"red", "green", "blue", "yellow"}
-local Num2Ascii = {"B", "L", "F", "R"} 
+local SlotNumbers = {red = 1, green = 2, blue = 3, yellow = 4}
+local Num2Ascii = {"B", "L", "F", "R"}
 local FilterCache = {} -- local cache for filter settings
 
 local function filter_settings(pos)
@@ -72,9 +73,9 @@ local function filter_settings(pos)
 			end
 		end
 	end
-	
+
 	FilterCache[minetest.hash_node_position(pos)] = {
-		ItemFilter = ItemFilter, 
+		ItemFilter = ItemFilter,
 		OpenPorts = OpenPorts,
 	}
 end
@@ -88,7 +89,7 @@ local function get_filter_settings(pos)
 --	}
 --	local OpenPorts = {3}
 --	return ItemFilter, OpenPorts
-	
+
 	local hash = minetest.hash_node_position(pos)
 	if FilterCache[hash] == nil then
 		filter_settings(pos)
@@ -111,8 +112,8 @@ local function blocking_checkbox(pos, filter, is_hp)
 		M(pos):set_int("blocking", 0) -- disable blocking
 	end
 	return ""
-end		
-		
+end
+
 local function formspec(self, pos, nvm)
 	local filter = minetest.deserialize(M(pos):get_string("filter")) or {false,false,false,false}
 	local is_hp = nvm.high_performance == true
@@ -185,7 +186,7 @@ end
 local function allow_metadata_inventory_put(pos, listname, index, stack, player)
 	local inv = M(pos):get_inventory()
 	local list = inv:get_list(listname)
-	
+
 	if minetest.is_protected(pos, player:get_player_name()) then
 		return 0
 	end
@@ -247,7 +248,7 @@ local function tubelib2_on_update2(pos, outdir, tlib2, node)
 			is_ta4_tube = is_ta4_tube and techage.TA4tubes[node.name]
 		end
 	end
-	
+
 	local nvm = techage.get_nvm(pos)
 	local crd = CRD(pos)
 	if CRD(pos).stage == 4 and not is_ta4_tube then
@@ -295,10 +296,10 @@ local function distributing(pos, inv, crd, nvm)
 	local sum_num_pushed = 0
 	local num_pushed = 0
 	local blocking_mode = M(pos):get_int("blocking") == 1
-	
+
 	-- start searching after last position
 	local offs = nvm.last_index or 1
-	
+
 	for i = 1, SRC_INV_SIZE do
 		local idx = ((i + offs - 1) % 8) + 1
 		local stack = inv:get_stack("src", idx)
@@ -308,7 +309,7 @@ local function distributing(pos, inv, crd, nvm)
 		local stack_to_push = stack:peek_item(num_to_push)
 		local filter = item_filter[item_name]
 		num_pushed = 0
-		
+
 		if filter and #filter > 0 then
 			-- Push items based on filter
 			num_pushed = push_item(pos, filter, stack_to_push, num_to_push, nvm)
@@ -320,16 +321,16 @@ local function distributing(pos, inv, crd, nvm)
 			-- Push items based on open ports
 			num_pushed = push_item(pos, open_ports, stack_to_push, num_to_push, nvm)
 		end
-			
+
 		sum_num_pushed = sum_num_pushed + num_pushed
 		stack:take_item(num_pushed)
 		inv:set_stack("src", idx, stack)
-		if sum_num_pushed >= (nvm.num_items or crd.num_items) then 
+		if sum_num_pushed >= (nvm.num_items or crd.num_items) then
 			nvm.last_index = idx
-			break 
+			break
 		end
 	end
-	
+
 	if sum_num_pushed == 0 then
 		crd.State:blocked(pos, nvm)
 	else
@@ -370,9 +371,9 @@ local function on_receive_fields(pos, formname, fields, player)
 		meta:set_int("blocking", fields.blocking == "true" and 1 or 0)
 	end
 	meta:set_string("filter", minetest.serialize(filter))
-	
+
 	filter_settings(pos)
-	
+
 	local nvm = techage.get_nvm(pos)
 	if fields.state_button ~= nil then
 		crd.State:state_button_event(pos, nvm, fields)
@@ -383,17 +384,17 @@ end
 
 -- techage command to turn on/off filter channels
 local function change_filter_settings(pos, slot, val)
-	local slots = {["red"] = 1, ["green"] = 2, ["blue"] = 3, ["yellow"] = 4}
 	local meta = M(pos)
 	local filter = minetest.deserialize(meta:get_string("filter")) or {false,false,false,false}
-	local num = slots[slot] or 1
+	local num = SlotNumbers[slot] or 1
 	if num >= 1 and num <= 4 then
 		filter[num] = val == "on"
 	end
 	meta:set_string("filter", minetest.serialize(filter))
-	
-	filter_settings(pos)
-	
+
+	local hash = minetest.hash_node_position(pos)
+	FilterCache[hash] = nil
+
 	local nvm = techage.get_nvm(pos)
 	meta:set_string("formspec", formspec(CRD(pos).State, pos, nvm))
 	return true
@@ -401,9 +402,45 @@ end
 
 -- techage command to read filter channel status (on/off)
 local function read_filter_settings(pos, slot)
-	local slots = {["red"] = 1, ["green"] = 2, ["blue"] = 3, ["yellow"] = 4}
 	local filter = minetest.deserialize(M(pos):get_string("filter")) or {false,false,false,false}
-	return filter[slots[slot]] and "on" or "off"
+	return filter[SlotNumbers[slot]] and "on" or "off"
+end
+
+local function get_payload_values(payload)
+	local color
+	local idx = 0
+	local items = {ItemStack(""), ItemStack(""), ItemStack(""), ItemStack(""), ItemStack(""), ItemStack("")}
+	for s in payload:gmatch("[^%s]+") do   --- white spaces
+		if not color then
+			if SlotNumbers[s] then
+				color = s
+			else
+				return "red", {}
+			end
+		else
+			idx = idx + 1
+			if idx <= 6 then
+				items[idx] = ItemStack(s)
+			end
+		end
+	end
+	return color, items
+end
+
+local function str_of_inv_items(pos, color)
+	color = SlotColors[color] or color
+	if SlotNumbers[color] then
+		local inv = M(pos):get_inventory()
+		local t = {}
+		for idx = 1, 6 do
+			local item = inv:get_stack(color, idx)
+			if item:get_count() > 0 then
+				t[#t + 1] = item:get_name()
+			end
+		end
+		return table.concat(t, " ")
+	end
+	return ""
 end
 
 local function can_dig(pos, player)
@@ -474,8 +511,45 @@ local tubing = {
 			else
 				return change_filter_settings(pos, slot, val)
 			end
-		else		
+		elseif topic == "config" then
+			local color, items = get_payload_values(payload)
+			local inv = M(pos):get_inventory()
+			for idx,item in ipairs(items) do
+				inv:set_stack(color, idx, item)
+			end
+			local hash = minetest.hash_node_position(pos)
+			FilterCache[hash] = nil
+			return true
+		elseif topic == "get" then
+			return str_of_inv_items(pos, payload)
+		else
 			return CRD(pos).State:on_receive_message(pos, topic, payload)
+		end
+	end,
+	on_beduino_receive_cmnd = function(pos, src, topic, payload)
+		if topic == 4 then
+			local slot = SlotColors[payload[1]]
+			local state = payload[2] == 1 and "on" or "off"
+			change_filter_settings(pos, slot, state)
+			return 0
+		elseif topic == 67 then
+			local color, items = get_payload_values(payload)
+			local inv = M(pos):get_inventory()
+			for idx,item in ipairs(items) do
+				inv:set_stack(color, idx, item)
+			end
+			local hash = minetest.hash_node_position(pos)
+			FilterCache[hash] = nil
+			return 0
+		else
+			return CRD(pos).State:on_beduino_receive_cmnd(pos, topic, payload)
+		end
+	end,
+	on_beduino_request_data = function(pos, src, topic, payload)
+		if topic == 148 then
+			return 0, str_of_inv_items(pos, payload[1])
+		else
+			return CRD(pos).State:on_beduino_request_data(pos, topic, payload)
 		end
 	end,
 	on_node_load = function(pos)

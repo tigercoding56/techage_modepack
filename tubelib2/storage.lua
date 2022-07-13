@@ -29,7 +29,7 @@ local function update_mod_storage()
 			storage:set_string(k, minetest.serialize(v))
 			MemStore[k] = nil  -- remove from memory
 		end
-	end	
+	end
 	-- run every 10 minutes
 	minetest.after(600, update_mod_storage)
 end
@@ -37,7 +37,7 @@ end
 minetest.register_on_shutdown(function()
 	for k,v in pairs(MemStore) do
 		storage:set_string(k, minetest.serialize(v))
-	end	
+	end
 end)
 
 minetest.after(600, update_mod_storage)
@@ -52,14 +52,14 @@ local function empty_block(block)
 	end
 	return empty
 end
-	
+
 minetest.after(1, function()
 	local tbl = storage:to_table()
 	for k,v in pairs(tbl.fields) do
 		if empty_block(v) then
 			storage:set_string(k, "")
 		end
-	end	
+	end
 end)
 
 --
@@ -81,7 +81,7 @@ local function new_node(block, node_key)
 end
 
 local function unlock(pos)
-	local block_key = math.floor((pos.z+32768)/16)*4096*4096 + 
+	local block_key = math.floor((pos.z+32768)/16)*4096*4096 +
 		math.floor((pos.y+32768)/16)*4096 + math.floor((pos.x+32768)/16)
 	local node_key = (pos.z%16)*16*16 + (pos.y%16)*16 + (pos.x%16)
 	local block = MemStore[block_key] or new_block(block_key)
@@ -129,16 +129,22 @@ function tubelib2.get_mem_data(pos, key, default)
 	return tubelib2.get_mem(pos)[key] or default
 end
 
-function tubelib2.walk_over_all(clbk)
+function tubelib2.walk_over_all(clbk, key)
 	local data = storage:to_table()
 	for block_key,sblock in pairs(data.fields) do
 		local block = minetest.deserialize(sblock)
 		for node_key,mem in pairs(block) do
-			if mem then
-				if node_key ~= "used" and node_key ~= "best_before" then
+			if mem and node_key ~= "used" and node_key ~= "best_before" then
+				if key == nil or (type(mem) == "table" and mem[key] ~= nil) then
 					local pos = keys_to_pos(block_key, node_key)
 					local node = tubelib2.get_node_lvm(pos)
-					clbk(pos, node, mem)
+					if key ~= nil then
+						-- only specified 'key'
+						clbk(pos, node, {[key] = mem[key]})
+					else
+						-- without specified 'key'
+						clbk(pos, node, mem)
+					end
 				end
 			end
 		end

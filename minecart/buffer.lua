@@ -37,7 +37,7 @@ local function remote_station_name(pos)
 	end
 end
 
-local function on_punch(pos, node, puncher)
+function minecart.update_buffer_infotext(pos)
 	local name = M(pos):get_string("name")
 	local dest = remote_station_name(pos)
 	if dest then
@@ -45,6 +45,10 @@ local function on_punch(pos, node, puncher)
 	else
 		M(pos):set_string("infotext", name .. ": " .. S("Not connected!"))
 	end
+end
+
+local function on_punch(pos, node, puncher)
+	minecart.update_buffer_infotext(pos)
 	M(pos):set_string("formspec", formspec(pos))
 	minetest.get_node_timer(pos):start(CYCLE_TIME)
 
@@ -159,13 +163,16 @@ minetest.register_craft({
 })
 
 minetest.register_lbm({
-	label = "Delete waiting times",
-	name = "minecart:del_time",
+	label = "Delete metadata",
+	name = "minecart:metadata",
 	nodenames = {"minecart:buffer"},
-	run_at_every_load = false,
+	run_at_every_load = true,
 	action = function(pos, node)
-		-- delete old data
-		minecart.get_route(pos)
-		M(pos):set_string("formspec", formspec(pos))
+		-- delete old metadata around the buffer (bugfix)
+		local pos1 = {x = pos.x - 2, y = pos.y - 2, z = pos.z - 2}
+		local pos2 = {x = pos.x + 2, y = pos.y + 2, z = pos.z + 2}
+		for _, pos in ipairs(minetest.find_nodes_with_meta(pos1, pos2)) do
+			minecart.del_metadata(pos)
+		end
 	end,
 })

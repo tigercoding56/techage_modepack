@@ -7,7 +7,7 @@
 
 	AGPL v3
 	See LICENSE.txt for more information
-	
+
 	TA3/TA4 Liquid Pipes
 
 ]]--
@@ -20,18 +20,18 @@ local S = techage.S
 
 local MAX_PIPE_LENGHT = 100
 
-local power = networks.power
+local liquid = networks.liquid
 
 local Pipe = tubelib2.Tube:new({
 	dirs_to_check = {1,2,3,4,5,6},
-	max_tube_length = MAX_PIPE_LENGHT, 
+	max_tube_length = MAX_PIPE_LENGHT,
 	show_infotext = false,
 	force_to_use_tubes = false,
 	tube_type = "pipe2",
 	primary_node_names = {
-		"techage:ta3_pipeS", "techage:ta3_pipeA", 
-		"techage:ta3_pipe_wall_entry", "techage:ta3_valve_open", 
-	}, 
+		"techage:ta3_pipeS", "techage:ta3_pipeA",
+		"techage:ta3_pipe_wall_entry", "techage:ta3_valve_open",
+	},
 	secondary_node_names = {},
 	after_place_tube = function(pos, param2, tube_type, num_tubes)
 		local name = minetest.get_node(pos).name
@@ -47,7 +47,7 @@ local Pipe = tubelib2.Tube:new({
 
 -- Use global callback instead of node related functions
 Pipe:register_on_tube_update2(function(pos, outdir, tlib2, node)
-	power.update_network(pos, outdir, tlib2, node)
+	liquid.update_network(pos, outdir, tlib2, node)
 end)
 
 minetest.register_node("techage:ta3_pipeS", {
@@ -60,7 +60,7 @@ minetest.register_node("techage:ta3_pipeS", {
 		"techage_gaspipe_hole2.png",
 		"techage_gaspipe_hole2.png",
 	},
-	
+
 	after_place_node = function(pos, placer, itemstack, pointed_thing)
 		if not Pipe:after_place_tube(pos, placer, pointed_thing) then
 			minetest.remove_node(pos)
@@ -68,11 +68,11 @@ minetest.register_node("techage:ta3_pipeS", {
 		end
 		return false
 	end,
-	
+
 	after_dig_node = function(pos, oldnode, oldmetadata, digger)
 		Pipe:after_dig_tube(pos, oldnode, oldmetadata)
 	end,
-	
+
 	paramtype2 = "facedir", -- important!
 	drawtype = "nodebox",
 	node_box = {
@@ -100,11 +100,11 @@ minetest.register_node("techage:ta3_pipeA", {
 		"techage_gaspipe_knee2.png",
 		"techage_gaspipe_hole2.png",
 	},
-	
+
 	after_dig_node = function(pos, oldnode, oldmetadata, digger)
 		Pipe:after_dig_tube(pos, oldnode, oldmetadata)
 	end,
-	
+
 	paramtype2 = "facedir", -- important!
 	drawtype = "nodebox",
 	node_box = {
@@ -172,14 +172,14 @@ local names = networks.register_junction("techage:ta3_junctionpipe", 1/8, Boxes,
 	tubelib2_on_update2 = function(pos, dir1, tlib2, node)
 		local name = "techage:ta3_junctionpipe" .. networks.junction_type(pos, Pipe)
 		minetest.swap_node(pos, {name = name, param2 = 0})
-		power.update_network(pos, 0, tlib2, node)
+		liquid.update_network(pos, 0, tlib2, node)
 	end,
 	after_dig_node = function(pos, oldnode, oldmetadata, digger)
 		Pipe:after_dig_node(pos)
 	end,
 }, 25)
 
-power.register_nodes(names, Pipe, "junc")
+liquid.register_nodes(names, Pipe, "junc")
 
 minetest.register_craft({
 	output = "techage:ta3_junctionpipe25 2",
@@ -203,4 +203,3 @@ minetest.register_alias("techage:ta4_pipeA", "techage:ta3_pipeA")
 minetest.register_alias("techage:ta4_pipeS", "techage:ta3_pipeS")
 
 techage.LiquidPipe = Pipe
-

@@ -3,11 +3,11 @@
 	TechAge
 	=======
 
-	Copyright (C) 2019-2020 Joachim Stolberg
+	Copyright (C) 2019-2022 Joachim Stolberg
 
 	AGPL v3
 	See LICENSE.txt for more information
-	
+
 	ICTA Controller - Signal Tower
 
 ]]--
@@ -18,14 +18,14 @@ local function switch_on(pos, node, color)
 	meta:set_string("state", color)
 	node.name = "techage:ta4_signaltower_"..color
 	minetest.swap_node(pos, node)
-end	
+end
 
 local function switch_off(pos, node)
 	local meta = minetest.get_meta(pos)
 	meta:set_string("state", "off")
 	node.name = "techage:ta4_signaltower"
 	minetest.swap_node(pos, node)
-end	
+end
 
 minetest.register_node("techage:ta4_signaltower", {
 	description = "TA4 Signal Tower",
@@ -42,7 +42,7 @@ minetest.register_node("techage:ta4_signaltower", {
 			{ -5/32, -16/32, -5/32,  5/32,  16/32, 5/32},
 		},
 	},
-	
+
 	after_place_node = function(pos, placer)
 		local number = techage.add_node(pos, "techage:ta4_signaltower")
 		local meta = minetest.get_meta(pos)
@@ -62,7 +62,7 @@ minetest.register_node("techage:ta4_signaltower", {
 
 	paramtype = "light",
 	use_texture_alpha = techage.CLIP,
-	light_source = 0,	
+	light_source = 0,
 	sunlight_propagates = true,
 	paramtype2 = "facedir",
 	groups = {cracky=2, crumbly=2},
@@ -94,7 +94,7 @@ for _,color in ipairs({"green", "amber", "red"}) do
 
 		paramtype = "light",
 		use_texture_alpha = techage.CLIP,
-		light_source = 10,	
+		light_source = 10,
 		sunlight_propagates = true,
 		paramtype2 = "facedir",
 		groups = {crumbly=0, not_in_creative_inventory=1},
@@ -113,9 +113,9 @@ minetest.register_craft({
 	},
 })
 
-techage.register_node({"techage:ta4_signaltower", 
-	"techage:ta4_signaltower_green", 
-	"techage:ta4_signaltower_amber", 
+techage.register_node({"techage:ta4_signaltower",
+	"techage:ta4_signaltower_green",
+	"techage:ta4_signaltower_amber",
 	"techage:ta4_signaltower_red"}, {
 	on_recv_message = function(pos, src, topic, payload)
 		local node = minetest.get_node(pos)
@@ -132,4 +132,27 @@ techage.register_node({"techage:ta4_signaltower",
 			return meta:get_string("state")
 		end
 	end,
-})		
+	on_beduino_receive_cmnd = function(pos, src, topic, payload)
+		if topic == 2 then
+			local color = ({"green", "amber", "red"})[payload[1]]
+			local node = minetest.get_node(pos)
+			if color then
+				switch_on(pos, node, color)
+			else
+				switch_off(pos, node)
+			end
+			return 0
+		else
+			return 2  -- unknown or invalid topic
+		end
+	end,
+	on_beduino_request_data = function(pos, src, topic, payload)
+		if topic == 130 then
+			local meta = minetest.get_meta(pos)
+			local color = ({off = 0, green = 1, amber = 2, red = 3})[meta:get_string("state")] or 1
+			return 0, {color}
+		else
+			return 2, ""  -- unknown or invalid topic
+		end
+	end,
+})

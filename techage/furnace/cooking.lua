@@ -7,9 +7,9 @@
 
 	AGPL v3
 	See LICENSE.txt for more information
-	
+
 	Cooking routines for furnace
-	
+
 ]]--
 
 -- for lazy programmers
@@ -40,7 +40,7 @@ local function all_ingredients_available(output, ingr)
 			end
 		end
 	end
-end			
+end
 
 -- Return a list with all outputs of the given list of ingredients
 local function get_recipes(ingr)
@@ -60,7 +60,7 @@ local function get_recipes(ingr)
 		return KeyList
 	end
 end
-	
+
 function techage.furnace.get_ingredients(pos)
 	local inv = M(pos):get_inventory()
 	local tbl = {}
@@ -116,7 +116,7 @@ local function process(inv, recipe, output)
 		end
 	end
 	return techage.RUNNING
-end		
+end
 
 function techage.furnace.check_if_worth_to_wakeup(pos, nvm)
 	local inv = M(pos):get_inventory()
@@ -141,7 +141,7 @@ function techage.furnace.check_if_worth_to_wakeup(pos, nvm)
 		end
 	end
 	return true
-end		
+end
 
 function techage.furnace.smelting(pos, nvm, elapsed)
 	local inv = M(pos):get_inventory()
@@ -154,11 +154,11 @@ function techage.furnace.smelting(pos, nvm, elapsed)
 		if not recipe then
 			return techage.FAULT, "recipe error"
 		end
-			
+
 		elapsed = elapsed + (nvm.leftover or 0)
 		while elapsed >= recipe.time do
 			state = process(inv, recipe, nvm.output)
-			if state ~= techage.RUNNING then 
+			if state ~= techage.RUNNING then
 				return state
 			end
 			elapsed = elapsed - recipe.time
@@ -192,14 +192,12 @@ function techage.furnace.reset_cooking(nvm)
 end
 
 
-if minetest.global_exists("unified_inventory") then
-	unified_inventory.register_craft_type("ta3_melting", {
-		description = S("TA3 Melting"),
-		icon = "techage_concrete.png^techage_appl_furnace.png^techage_frame_ta3.png",
-		width = 2,
-		height = 2,
-	})
-end
+techage.recipes.register_craft_type("ta3_melting", {
+	description = S("TA3 Melting"),
+	icon = "techage_concrete.png^techage_appl_furnace.png^techage_frame_ta3.png",
+	width = 2,
+	height = 2,
+})
 
 function techage.furnace.register_recipe(recipe)
 	local words = string.split(recipe.output, " ")
@@ -224,9 +222,7 @@ function techage.furnace.register_recipe(recipe)
 		end
 	end
 
-	if minetest.global_exists("unified_inventory") then
-		recipe.items = recipe.recipe
-		recipe.type = "ta3_melting"
-		unified_inventory.register_craft(recipe)
-	end
+	recipe.items = recipe.recipe
+	recipe.type = "ta3_melting"
+	techage.recipes.register_craft(recipe)
 end
